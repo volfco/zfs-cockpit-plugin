@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="addon">
+  <id>org.cockpit_project.zfs</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <name>ZFS</name>
+  <summary>ZFS &amp; zpool manager</summary>
+  <description>
+    <p>
+      Cockpit plugin for managing ZFS pools (zpool) and datasets (zfs):
+      pools and vdevs, datasets, snapshots, send/receive, and scrub.
+    </p>
+  </description>
+  <extends>org.cockpit_project.cockpit</extends>
+  <launchable type="cockpit-manifest">zfs</launchable>
+  <url type="homepage">https://github.com/volfco/zfs-cockpit-plugin</url>
+  <url type="bugtracker">https://github.com/volfco/zfs-cockpit-plugin/issues</url>
+  <update_contact>volfco_AT_users.noreply.github.com</update_contact>
+  <developer>
+    <name>volfco</name>
+  </developer>
+</component>

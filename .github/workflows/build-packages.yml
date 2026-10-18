@@ -1,0 +1,100 @@
+name: build-packages
+on:
+  push:
+    tags:
+      # this is a glob, not a regexp
+      - '[0-9]*'
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rpm:
+    name: RPM
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/cockpit-project/tasks:latest
+      options: --user root
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      # https://github.com/blog/2022-04-12-git-security-vulnerability-announced/
+      - name: Pacify git's permission check
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      # rpm-build, gettext, nodejs/npm, jq, file and appstream-util ship in the
+      # tasks image; a dnf install would only add flaky mirror failures
+      - name: Build RPM
+        run: make rpm
+
+      - name: Upload RPM artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: rpm
+          path: '*.rpm'
+          if-no-files-found: error
+
+  deb:
+    name: DEB
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      # build-essential is a builtin dpkg build-depend (Dpkg::Vendor::Debian) and
+      # is no longer preinstalled on the runner image (D12); node/npm/gettext are
+      # explicit Build-Depends of debian/control and are installed here as well
+      - name: Install packaging tooling
+        run: sudo apt-get update && sudo apt-get install -y debhelper build-essential nodejs npm gettext
+
+      # dist/ is gitignored, so build the bundle before packaging
+      - name: Build bundle
+        run: make
+
+      # debian/changelog carries the release version; give the package the
+      # tag's version (make print-version strips a leading "v")
+      - name: Set package version
+        run: |
+          sed -i "1s/1\.0\.0-1/$(make print-version)-1/" debian/changelog
+          head -1 debian/changelog
+
+      - name: Build DEB
+        run: dpkg-buildpackage -us -uc -b
+
+      - name: Collect .deb
+        run: mv ../*.deb .
+
+      - name: Upload DEB artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: deb
+          path: '*.deb'
+          if-no-files-found: error
+
+  # one job attaches both packages, so the two build jobs never race to create
+  # the release
+  release:
+    name: Attach to release
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: [rpm, deb]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v8
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Attach to release
+        uses: softprops/action-gh-release@v3
+        with:
+          files: dist/*

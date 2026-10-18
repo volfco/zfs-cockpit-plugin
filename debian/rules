@@ -1,0 +1,10 @@
+#!/usr/bin/make -f
+%:
+	dh $@
+
+# the default dh_auto_clean/dh_auto_build make invocations build the bundle
+# from source (Build-Depends has nodejs/npm/gettext); debian/install places
+# dist/* and the metainfo, so make install is not used here
+override_dh_auto_install:
+
+override_dh_auto_test:

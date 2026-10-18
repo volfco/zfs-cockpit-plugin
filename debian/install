@@ -1,0 +1,2 @@
+dist/* usr/share/cockpit/zfs
+org.cockpit_project.zfs.metainfo.xml usr/share/metainfo/

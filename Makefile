@@ -2,7 +2,7 @@
 PACKAGE_NAME := $(shell awk '/"name":/ {gsub(/[",]/, "", $$2); print $$2}' package.json)
 RPM_NAME := cockpit-$(PACKAGE_NAME)
 # tags are often prefixed with "v" (v1.2.3); packages carry the bare version
-VERSION := $(shell T=$$(git describe --tags 2>/dev/null) || T=1; echo $$T | tr '-' '.' | sed 's/^v//')
+VERSION := $(shell T=$$(git describe --tags 2>/dev/null) || T=1.0.0; echo $$T | tr '-' '.' | sed 's/^v//')
 ifeq ($(TEST_OS),)
 TEST_OS = centos-9-stream
 endif

@@ -1,0 +1,16 @@
+Source: cockpit-zfs
+Maintainer: volfco <volfco@users.noreply.github.com>
+Section: admin
+Priority: optional
+Standards-Version: 4.6.2
+# build-essential:native is a builtin dpkg build-dep that is no longer
+# preinstalled on the GitHub runner image (D12) — declare it explicitly
+Build-Depends: debhelper-compat (= 13), build-essential:native, nodejs, npm, gettext
+Rules-Requires-Root: no
+
+Package: cockpit-zfs
+Architecture: all
+Depends: ${misc:Depends}, cockpit-bridge (>= 137)
+Description: ZFS & zpool Manager
+ Cockpit plugin for managing ZFS pools (zpool) and datasets (zfs): pools
+ and vdevs, datasets, snapshots, send/receive, and scrub.

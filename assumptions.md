@@ -8,10 +8,12 @@ Provided / inferred / assumed constraints for this project:
   = fixtures + mocked UI AND live host `colum@203.0.113.139`; packaging = full
   rpm/deb/arch/CI parity with hpssa.
 - Live validation host: `colum@203.0.113.139`, Debian 13, OpenZFS 2.3.9,
-  passwordless sudo for user `colum`. The host has NO usable pools of its own —
-  two real pools exist in exported/damaged state (`hdd0` UNAVAIL, `ssd1` DEGRADED,
-  backed by real disks). Those and all real disks are OFF LIMITS; all live testing
-  uses file-vdev scratch pools under `/tmp/zfs-fixtures/` (currently `scratch`).
+  passwordless sudo for user `colum`. Real pools `hdd0` (UNAVAIL, damaged) and
+  `ssd1` (imported 2026-10-18 by the user, active repair: `zpool replace … /dev/sdl`)
+  and all real disks are OFF LIMITS. The file-vdev scratch pool `scratch`
+  (`/tmp/zfs-fixtures/`) captured for fixtures was removed host-side on
+  2026-10-18; recreate with `just live-scratch-up`, remove with
+  `just live-scratch-down`. Live testing must only ever touch that scratch pool.
 - File-based vdev pools require `zpool import -d /tmp/zfs-fixtures` (the import
   dialog therefore has a search-directory field).
 - Parser design assumes stable machine forms: `zfs list/get -H -o …`,

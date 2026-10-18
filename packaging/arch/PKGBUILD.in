@@ -1,0 +1,15 @@
+pkgname=cockpit-zfs
+pkgver=VERSION
+pkgrel=1
+pkgdesc='ZFS & zpool Manager - Cockpit plugin'
+arch=('any')
+url='https://github.com/volfco/zfs-cockpit-plugin'
+license=('LGPL-2.1-or-later')
+source=("SOURCE")
+sha256sums=('SKIP')
+
+package() {
+  depends=(cockpit)
+  cd $pkgname
+  make DESTDIR="$pkgdir" install PREFIX=/usr
+}
