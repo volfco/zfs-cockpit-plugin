@@ -117,6 +117,28 @@ body,
     font-family: var(--pf-t--global--font--family--mono);
 }
 
+.zfs-history-command {
+    margin: 0;
+    font-family: var(--pf-t--global--font--family--mono);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.zfs-vdev-section {
+    font-weight: var(--pf-t--global--font--weight--semi-bold);
+    background-color: var(--pf-t--global--background--color--secondary--default);
+}
+
+.zfs-import-summary {
+    display: grid;
+    gap: var(--pf-t--global--spacer--md);
+}
+
+.zfs-import-config {
+    max-block-size: 16rem;
+    overflow: auto;
+}
+
 .zfs-controller-tabs {
     // Page sections do not shrink; the sibling tab strip must keep its height too.
     flex-shrink: 0;
