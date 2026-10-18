@@ -73,7 +73,7 @@ appstream-util validate-relax --nonet %{buildroot}/%{_datadir}/metainfo/*
 # FMF (see plans/all.fmf) during package gating
 
 %files
-# TODO(docs-wave): re-add %doc README.md once README.md exists
+%doc README.md
 %license LICENSE dist/index.js.LEGAL.txt
 %{_datadir}/cockpit/*
 %{_datadir}/metainfo/*

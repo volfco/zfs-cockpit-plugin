@@ -114,3 +114,7 @@ fixtures-capture:
     ssh {{ssh_opts}} {{host}} 'sudo bash -s' < test/fixtures/capture.sh
     scp {{ssh_opts}} {{host}}:'{{capture_dir}}/*' test/fixtures/raw/
     node test/parser-check.mjs
+
+# Push master to the GitHub remote (external op kept as a recipe per repo rules)
+push:
+    git push origin master
