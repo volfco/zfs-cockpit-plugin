@@ -1,7 +1,18 @@
-=T=
-The diff delegated permission is needed in order
-to create a just-in-time snapshot for diffing
-: unable to generate diffs
-The diff delegated permission is needed in order
-to create a just-in-time snapshot for diffing
-: unable to generate diffs
+=PLAIN=
+M	/mnt/scratch/fs1/
++	/mnt/scratch/fs1/dir1
++	/mnt/scratch/fs1/dir1/nested.txt
++	/mnt/scratch/fs1/newfile.txt
++	/mnt/scratch/fs1/marker
+=HT=
+1792367286.480996292	M	/	/mnt/scratch/fs1/
+1792367286.508996443	+	/	/mnt/scratch/fs1/dir1
+1792367286.508996443	+	F	/mnt/scratch/fs1/dir1/nested.txt
+1792367286.456996160	+	F	/mnt/scratch/fs1/newfile.txt
+1792367286.480996292	+	F	/mnt/scratch/fs1/marker
+=HTSINGLE=
+1792367286.480996292	M	/mnt/scratch/fs1/
+1792367286.508996443	+	/mnt/scratch/fs1/dir1
+1792367286.508996443	+	/mnt/scratch/fs1/dir1/nested.txt
+1792367286.456996160	+	/mnt/scratch/fs1/newfile.txt
+1792367286.480996292	+	/mnt/scratch/fs1/marker
