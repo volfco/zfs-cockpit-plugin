@@ -71,7 +71,7 @@ function errText(e: unknown): string {
     return String(e);
 }
 
-async function run(bin: 'zfs' | 'zpool', args: string[], reason?: string | RunOpts): Promise<string> {
+async function run(bin: 'zfs' | 'zpool' | 'sh', args: string[], reason?: string | RunOpts): Promise<string> {
     const opts: RunOpts = typeof reason === 'string' ? { reason } : (reason ?? {});
     const skip = opts.discovery && !logDiscovery;
     const entry: CommandLogEntry | null = skip
@@ -131,6 +131,13 @@ export function runZfs(args: string[], reason?: string | RunOpts): Promise<strin
 
 export function runZpool(args: string[], reason?: string | RunOpts): Promise<string> {
     return run('zpool', args, reason);
+}
+
+// Shell pipeline runner for binary send/receive streams and file redirects
+// (decisions.md D8: raw streams cannot pass through cockpit.spawn text
+// streams). Logged like every other run.
+export function runShell(command: string, reason?: string | RunOpts): Promise<string> {
+    return run('sh', ['-c', command], reason);
 }
 
 // Splits a free-form command line into argv. Strips an optional leading

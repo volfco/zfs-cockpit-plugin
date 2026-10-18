@@ -206,7 +206,7 @@ export interface CommandLogEntry {
     timestamp: number;
     reason: string;
     args: string[];
-    bin: 'zfs' | 'zpool';
+    bin: 'zfs' | 'zpool' | 'sh';
     status: 'pending' | 'success' | 'error';
     output?: string | undefined;
     error?: string | undefined;

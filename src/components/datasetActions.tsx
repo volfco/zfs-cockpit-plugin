@@ -44,18 +44,12 @@ function gated(cap: string): Partial<ActionItem> {
 // ---------------------------------------------------------------------------
 // Shell execution for pipes/redirects (decisions.md D8): raw send streams are
 // binary and cannot pass through cockpit.spawn text streams, so send/receive
-// pipelines run under `sh -c` with strict single-quote escaping.
-// shortcut: these runs bypass the service command log (service.ts has no
-// shell-capable runner); the composed command is shown in the dialog instead.
-// upgrade when service.ts grows a runShell() that can log it.
+// pipelines run under `sh -c` with strict single-quote escaping. Runs go
+// through svc.runShell so they land in the command log.
 // ---------------------------------------------------------------------------
 
 export function shellQuote(s: string): string {
     return "'" + s.replace(/'/g, "'\\''") + "'";
-}
-
-function runShell(command: string): Promise<string> {
-    return cockpit.spawn(['sh', '-c', command], { err: 'message', superuser: 'require' });
 }
 
 // Render argv as a copy-pasteable command; flags stay bare, operands quoted.
@@ -262,7 +256,7 @@ function SendDialog({ def, onClose, onSuccess }: { def: SendDef; onClose: () => 
         try {
             // Mode "dry" is realized by the preview; run() executes the
             // composed shell command for pipe/file modes.
-            const out = await runShell(composeCommand());
+            const out = await svc.runShell(composeCommand(), _('Send ZFS stream (composed pipeline)'));
             setResult(out || _("Command completed successfully."));
             onSuccess();
         } catch (e: unknown) {
@@ -621,7 +615,7 @@ function ReceiveDialog({ def, onClose, onSuccess }: { def: ReceiveDef; onClose: 
         try {
             const out = f.abort
                 ? await svc.dsReceive({ target: f.target, abort: true })
-                : await runShell(composeCommand());
+                : await svc.runShell(composeCommand(), _('Receive ZFS stream (composed pipeline)'));
             setResult(out || _("Command completed successfully."));
             onSuccess();
         } catch (e: unknown) {
