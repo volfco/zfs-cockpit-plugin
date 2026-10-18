@@ -1,0 +1,38 @@
+  pool: scratch
+ state: ONLINE
+  scan: resilvered 460K in 00:00:00 with 0 errors on Sun Oct 18 11:30:09 2026
+config:
+
+	NAME                             STATE     READ WRITE CKSUM
+	scratch                          ONLINE       0     0     0
+	  raidz1-0                       ONLINE       0     0     0
+	    /tmp/zfs-fixtures/disk9.img  ONLINE       0     0     0
+	    /tmp/zfs-fixtures/disk2.img  ONLINE       0     0     0
+	    /tmp/zfs-fixtures/disk3.img  ONLINE       0     0     0
+	    /tmp/zfs-fixtures/disk4.img  ONLINE       0     0     0
+	logs	
+	  mirror-1                       ONLINE       0     0     0
+	    /tmp/zfs-fixtures/disk6.img  ONLINE       0     0     0
+	    /tmp/zfs-fixtures/disk7.img  ONLINE       0     0     0
+	cache
+	  /tmp/zfs-fixtures/disk8.img    ONLINE       0     0     0
+	spares
+	  /tmp/zfs-fixtures/disk5.img    AVAIL   
+
+errors: No known data errors
+=LIST=
+NAME                              SIZE  ALLOC   FREE  CKPOINT  EXPANDSZ   FRAG    CAP  DEDUP    HEALTH  ALTROOT
+scratch                          1.88G  1.06M  1.87G        -         -     4%     0%  1.00x    ONLINE  -
+  raidz1-0                       1.88G  1.06M  1.87G        -         -     4%  0.05%      -    ONLINE
+    /tmp/zfs-fixtures/disk9.img   512M      -      -        -         -      -      -      -    ONLINE
+    /tmp/zfs-fixtures/disk2.img   512M      -      -        -         -      -      -      -    ONLINE
+    /tmp/zfs-fixtures/disk3.img   512M      -      -        -         -      -      -      -    ONLINE
+    /tmp/zfs-fixtures/disk4.img   512M      -      -        -         -      -      -      -    ONLINE
+logs                                 -      -      -        -         -      -      -      -         -
+  mirror-1                        480M      0   480M        -         -     0%  0.00%      -    ONLINE
+    /tmp/zfs-fixtures/disk6.img   512M      -      -        -         -      -      -      -    ONLINE
+    /tmp/zfs-fixtures/disk7.img   512M      -      -        -         -      -      -      -    ONLINE
+cache                                -      -      -        -         -      -      -      -         -
+  /tmp/zfs-fixtures/disk8.img     512M  18.5K   507M        -         -     0%  0.00%      -    ONLINE
+spare                                -      -      -        -         -      -      -      -         -
+  /tmp/zfs-fixtures/disk5.img     512M      -      -        -         -      -      -      -     AVAIL

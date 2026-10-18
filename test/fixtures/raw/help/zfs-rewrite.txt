@@ -1,0 +1,41 @@
+ZFS-REWRITE(8)               System Manager's Manual             ZFS-REWRITE(8)
+
+NAME
+       zfs-rewrite — rewrite specified files without modification
+
+SYNOPSIS
+       zfs rewrite [-rvx] [-l length] [-o offset] file|directory…
+
+DESCRIPTION
+       Rewrite blocks of specified file as is without modification at a new lo‐
+       cation  and possibly with new properties, such as checksum, compression,
+       dedup, copies, etc, as if they were atomically read and written back.
+
+       -l length
+           Rewrite at most this number of bytes.
+
+       -o offset
+           Start at this offset in bytes.
+
+       -r  Recurse into directories.
+
+       -v  Print names of all successfully rewritten files.
+
+       -x  Don't cross file system mount points when recursing.
+
+NOTES
+       Rewrite of cloned blocks and blocks that are part of any snapshots, same
+       as some property changes may increase pool space usage.  Holes that were
+       never written or were previously zero-compressed are not  rewritten  and
+       will remain holes even if compression is disabled.
+
+       Rewritten  blocks  will be seen as modified in next snapshot and as such
+       included into the incremental zfs send stream.
+
+       If a -l or -o value request a rewrite to regions past  the  end  of  the
+       file, then those regions are silently ignored, and no error is reported.
+
+SEE ALSO
+       zfsprops(7)
+
+OpenZFS                           May 6, 2025                    ZFS-REWRITE(8)

@@ -1,0 +1,36 @@
+  pool: scratch
+ state: DEGRADED
+status: One or more devices has been taken offline by the administrator.
+	Sufficient replicas exist for the pool to continue functioning in a
+	degraded state.
+action: Online the device using 'zpool online' or replace the device with
+	'zpool replace'.
+  scan: scrub repaired 0B in 00:00:00 with 0 errors on Sun Oct 18 11:29:59 2026
+config:
+
+	NAME                             STATE     READ WRITE CKSUM
+	scratch                          DEGRADED     0     0     0
+	  raidz1-0                       DEGRADED     0     0     0
+	    /tmp/zfs-fixtures/disk1.img  ONLINE       0     0     0
+	    /tmp/zfs-fixtures/disk2.img  OFFLINE      0     0     0
+	    /tmp/zfs-fixtures/disk3.img  ONLINE       0     0     0
+	    /tmp/zfs-fixtures/disk4.img  ONLINE       0     0     0
+	logs	
+	  mirror-1                       ONLINE       0     0     0
+	    /tmp/zfs-fixtures/disk6.img  ONLINE       0     0     0
+	    /tmp/zfs-fixtures/disk7.img  ONLINE       0     0     0
+	cache
+	  /tmp/zfs-fixtures/disk8.img    ONLINE       0     0     0
+	spares
+	  /tmp/zfs-fixtures/disk5.img    AVAIL   
+
+errors: No known data errors
+=ON=
+  pool: scratch
+ state: ONLINE
+  scan: resilvered 4.50K in 00:00:00 with 0 errors on Sun Oct 18 11:30:01 2026
+config:
+
+	NAME                             STATE     READ WRITE CKSUM
+	scratch                          ONLINE       0     0     0
+	  raidz1-0                       ONLINE       0     0     0

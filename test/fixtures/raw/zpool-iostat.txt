@@ -1,0 +1,29 @@
+scratch	976K	1.87G	0	147	3.17K	497K
+raidz1-0	976K	1.87G	0	145	2.11K	372K
+/tmp/zfs-fixtures/disk1.img	-	-	0	39	540	95.1K
+/tmp/zfs-fixtures/disk2.img	-	-	0	31	540	89.9K
+/tmp/zfs-fixtures/disk3.img	-	-	0	39	540	95.3K
+/tmp/zfs-fixtures/disk4.img	-	-	0	35	540	92.0K
+
+mirror-1	0	480M	0	2	1.06K	125K
+/tmp/zfs-fixtures/disk6.img	-	-	0	1	543	62.4K
+/tmp/zfs-fixtures/disk7.img	-	-	0	1	543	62.4K
+
+/tmp/zfs-fixtures/disk8.img	6K	507M	0	0	10.5K	760
+=P=
+                                   capacity     operations     bandwidth 
+pool                             alloc   free   read  write   read  write
+-------------------------------  -----  -----  -----  -----  -----  -----
+scratch                           976K  1.87G      0    147  3.17K   496K
+  raidz1-0                        976K  1.87G      0    145  2.11K   372K
+    /tmp/zfs-fixtures/disk1.img      -      -      0     39    540  95.1K
+    /tmp/zfs-fixtures/disk2.img      -      -      0     31    540  89.9K
+    /tmp/zfs-fixtures/disk3.img      -      -      0     39    540  95.3K
+    /tmp/zfs-fixtures/disk4.img      -      -      0     35    540  91.9K
+logs                                 -      -      -      -      -      -
+  mirror-1                           0   480M      0      2  1.06K   125K
+    /tmp/zfs-fixtures/disk6.img      -      -      0      1    542  62.4K
+    /tmp/zfs-fixtures/disk7.img      -      -      0      1    542  62.4K
+cache                                -      -      -      -      -      -
+  /tmp/zfs-fixtures/disk8.img       6K   507M      0      0  10.5K    759
+-------------------------------  -----  -----  -----  -----  -----  -----

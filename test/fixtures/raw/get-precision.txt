@@ -1,0 +1,5 @@
+=VDEV=
+=ZFS=
+Cannot get properties of scratch: no such pool available.
+Cannot get properties of scratch: no such pool available.
+cannot open 'scratch/fs1': dataset does not exist

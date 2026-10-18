@@ -1,0 +1,136 @@
+// Use Cockpit's page foundation explicitly; bare "page.scss" is ambiguous
+// with PatternFly's Page component stylesheet in Sass load paths.
+@use "../pkg/lib/page.scss";
+@use "@patternfly/patternfly/components/Table/table.scss";
+@use "@patternfly/patternfly/components/Table/table-grid.scss";
+@use "@patternfly/patternfly/utilities/Accessibility/accessibility.scss";
+@use "@patternfly/patternfly/utilities/Spacing/spacing.scss";
+@use "@patternfly/patternfly/utilities/Text/text.scss";
+@use "@patternfly/patternfly/utilities/Display/display.scss";
+@use "@patternfly/patternfly/utilities/Flex/flex.scss";
+
+html,
+body,
+#app {
+    block-size: 100%;
+}
+
+.zfs-page {
+    min-block-size: 0;
+
+    .pf-v6-c-page__main {
+        min-inline-size: 0;
+    }
+
+    .pf-v6-c-page__main-section,
+    .pf-v6-c-page__main-body,
+    .pf-v6-l-flex__item,
+    .pf-v6-c-card,
+    .pf-v6-c-card__header-main,
+    .pf-v6-c-data-list__cell {
+        min-inline-size: 0;
+    }
+
+    .pf-v6-c-description-list__term,
+    .pf-v6-c-description-list__description {
+        overflow-wrap: anywhere;
+    }
+
+    .pf-v6-c-description-list {
+        --pf-v6-c-description-list--m-horizontal__term--width: 10rem;
+    }
+}
+
+.zfs-page-header {
+    border-block-end: var(--pf-t--global--border--width--regular) solid var(--pf-t--global--border--color--default);
+}
+
+// PF utilities don't provide this legacy text-color utility.
+.pf-v6-u-color-200 {
+    color: var(--pf-t--global--text--color--subtle);
+}
+
+.zfs-setting-value {
+    display: block;
+    font-family: var(--pf-t--global--font--family--mono);
+    overflow-wrap: anywhere;
+}
+
+// Contain unusually wide hardware values without scrolling the entire page.
+.zfs-table-region {
+    max-inline-size: 100%;
+    overflow-x: auto;
+    container-type: inline-size;
+    container-name: pf-v6-contain-table;
+}
+
+.zfs-property-table {
+    table-layout: fixed;
+
+    th,
+    td {
+        overflow-wrap: anywhere;
+    }
+
+    th {
+        inline-size: 40%;
+    }
+}
+
+.zfs-toggle-cell,
+.zfs-row-actions {
+    inline-size: 1%;
+    white-space: nowrap;
+}
+
+.zfs-toggle-cell {
+    padding-inline-end: 0;
+}
+
+.zfs-row-actions {
+    text-align: end;
+}
+
+.zfs-pd-details-row > td {
+    background-color: var(--pf-t--global--background--color--secondary--default);
+}
+
+.zfs-pd-details-row[hidden] {
+    display: none;
+}
+
+.zfs-pd-details {
+    padding: var(--pf-t--global--spacer--md);
+}
+
+.zfs-array-header {
+    inline-size: 100%;
+    align-items: start;
+    flex-wrap: nowrap;
+
+    > .pf-v6-l-flex__item {
+        min-inline-size: 0;
+    }
+}
+
+.zfs-log-time {
+    font-family: var(--pf-t--global--font--family--mono);
+}
+
+.zfs-controller-tabs {
+    // Page sections do not shrink; the sibling tab strip must keep its height too.
+    flex-shrink: 0;
+    min-inline-size: 0;
+}
+
+@container pf-v6-contain-table (width < 62rem) {
+    .zfs-pd-details-row > td {
+        grid-column: 1 / -1;
+    }
+}
+
+// Menus are portaled outside scrolling table regions, with room to scroll
+// the long controller action list on small screens.
+.zfs-action-menu {
+    max-inline-size: calc(100vw - 2rem);
+}

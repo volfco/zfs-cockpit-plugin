@@ -1,0 +1,161 @@
+ZFS(8)                       System Manager's Manual                     ZFS(8)
+
+NAME
+       zfs — configure ZFS datasets
+
+SYNOPSIS
+       zfs -?V
+       zfs version [-j]
+       zfs subcommand [arguments]
+
+DESCRIPTION
+       The  zfs  command  configures ZFS datasets within a ZFS storage pool, as
+       described in zpool(8).  A dataset is identified by a unique path  within
+       the ZFS namespace:
+
+             pool[/component]/component
+
+       for example:
+
+             rpool/var/log
+
+       The  maximum  length  of  a dataset name is ZFS_MAX_DATASET_NAME_LEN - 1
+       ASCII characters (currently 255) satisfying [A-Za-z_.:/  -].   Addition‐
+       ally  snapshots are allowed to contain a single @ character, while book‐
+       marks are allowed to contain a single # character.  / is used as separa‐
+       tor between components.  The maximum amount of nesting allowed in a path
+       is zfs_max_dataset_nesting levels deep.  ZFS tunables  (zfs_*)  are  ex‐
+       plained in zfs(4).
+
+       A dataset can be one of the following:
+
+             file system  Can  be  mounted within the standard system namespace
+                          and behaves like other file systems.  While ZFS  file
+                          systems are designed to be POSIX-compliant, known is‐
+                          sues  exist  that  prevent  compliance in some cases.
+                          Applications that  depend  on  standards  conformance
+                          might fail due to non-standard behavior when checking
+                          file system free space.
+
+             volume       A  logical  volume exported as a raw or block device.
+                          This type of dataset should only be used when a block
+                          device is required.  File systems are typically  used
+                          in most environments.
+
+             snapshot     A  read-only  version of a file system or volume at a
+                          given  point   in   time.    It   is   specified   as
+                          filesystem@name or volume@name.
+
+             bookmark     Much like a snapshot, but without the hold on on-disk
+                          data.   It  can  be used as the source of a send (but
+                          not   for   a   receive).    It   is   specified   as
+                          filesystem#name or volume#name.
+
+       See zfsconcepts(7) for details.
+
+   Properties
+       Properties  are  divided  into two types: native properties and user-de‐
+       fined (or "user") properties.  Native properties either export  internal
+       statistics  or control ZFS behavior.  In addition, native properties are
+       either editable or read-only.  User properties have no effect on ZFS be‐
+       havior, but you can use them to annotate datasets in a way that is mean‐
+       ingful in your environment.  For more information about properties,  see
+       zfsprops(7).
+
+   Encryption
+       Enabling  the  encryption  feature  allows for the creation of encrypted
+       filesystems and volumes.  ZFS will encrypt file and zvol data, file  at‐
+       tributes,  ACLs, permission bits, directory listings, FUID mappings, and
+       userused/groupused/projectused data.  For an overview of encryption, see
+       zfs-load-key(8).
+
+SUBCOMMANDS
+       All subcommands that modify state are logged persistently to the pool in
+       their original form.
+
+       zfs -?
+         Displays a help message.
+
+       zfs -V, --version
+
+=ZPOOL=
+ZPOOL(8)                     System Manager's Manual                   ZPOOL(8)
+
+NAME
+       zpool — configure ZFS storage pools
+
+SYNOPSIS
+       zpool -?V
+       zpool version [-j]
+       zpool subcommand [arguments]
+
+DESCRIPTION
+       The  zpool  command  configures  ZFS storage pools.  A storage pool is a
+       collection of devices that provides physical storage and  data  replica‐
+       tion  for  ZFS  datasets.   All datasets within a storage pool share the
+       same space.  See zfs(8) for information on managing datasets.
+
+       For an overview of creating and  managing  ZFS  storage  pools  see  the
+       zpoolconcepts(7) manual page.
+
+SUBCOMMANDS
+       All subcommands that modify state are logged persistently to the pool in
+       their original form.
+
+       The  zpool  command  provides  subcommands to create and destroy storage
+       pools, add capacity to storage pools, and provide information about  the
+       storage pools.  The following subcommands are supported:
+
+       zpool -?
+               Displays a help message.
+
+       zpool -V, --version
+
+       zpool version [-j]
+               Displays  the software version of the zpool userland utility and
+               the ZFS kernel module.  Use -j option to output in JSON format.
+
+   Creation
+       zpool-create(8)
+               Creates a new storage pool containing the virtual devices speci‐
+               fied on the command line.
+
+       zpool-initialize(8)
+               Begins initializing by writing to all unallocated regions on the
+               specified devices, or all eligible devices in the pool if no in‐
+               dividual devices are specified.
+
+   Destruction
+       zpool-destroy(8)
+               Destroys the given pool, freeing up any devices for other use.
+
+       zpool-labelclear(8)
+               Removes ZFS label information from the specified device.
+
+   Virtual Devices
+       zpool-attach(8)/zpool-detach(8)
+               Converts a non-redundant disk into a mirror,  or  increases  the
+               redundancy level of an existing mirror (attach), or performs the
+               inverse operation ( detach).
+
+       zpool-add(8)/zpool-remove(8)
+               Adds the specified virtual devices to the given pool, or removes
+               the specified device from the pool.
+
+       zpool-replace(8)
+               Replaces  an  existing  device (which may be faulted) with a new
+               one.
+
+       zpool-split(8)
+               Creates a new pool by splitting all mirrors in an existing  pool
+               (which decreases its redundancy).
+
+   Properties
+       Available pool properties listed in the zpoolprops(7) manual page.
+
+       zpool-list(8)
+               Lists  the  given pools along with a health status and space us‐
+               age.
+
+       zpool-get(8)/zpool-set(8)
+               Retrieves the given list of properties (or all properties if all

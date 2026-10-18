@@ -1,0 +1,137 @@
+scratch/fs1	type	filesystem	-
+scratch/fs1	creation	Sun Oct 18 11:28 2026	-
+scratch/fs1	used	65.8K	-
+scratch/fs1	available	236M	-
+scratch/fs1	referenced	32.9K	-
+scratch/fs1	compressratio	1.00x	-
+scratch/fs1	mounted	yes	-
+scratch/fs1	quota	2G	local
+scratch/fs1	reservation	none	default
+scratch/fs1	recordsize	128K	local
+scratch/fs1	mountpoint	/mnt/scratch/fs1	local
+scratch/fs1	sharenfs	off	default
+scratch/fs1	checksum	on	default
+scratch/fs1	compression	lz4	local
+scratch/fs1	atime	on	default
+scratch/fs1	devices	on	default
+scratch/fs1	exec	on	default
+scratch/fs1	setuid	on	default
+scratch/fs1	readonly	off	default
+scratch/fs1	zoned	off	default
+scratch/fs1	snapdir	hidden	default
+scratch/fs1	aclmode	discard	default
+scratch/fs1	aclinherit	restricted	default
+scratch/fs1	createtxg	22	-
+scratch/fs1	canmount	on	default
+scratch/fs1	xattr	on	default
+scratch/fs1	copies	1	default
+scratch/fs1	version	5	-
+scratch/fs1	utf8only	off	-
+scratch/fs1	normalization	none	-
+scratch/fs1	casesensitivity	sensitive	-
+scratch/fs1	vscan	off	default
+scratch/fs1	nbmand	off	default
+scratch/fs1	sharesmb	off	default
+scratch/fs1	refquota	none	default
+scratch/fs1	refreservation	none	default
+scratch/fs1	guid	11458417090376016640	-
+scratch/fs1	primarycache	all	default
+scratch/fs1	secondarycache	all	default
+scratch/fs1	usedbysnapshots	0B	-
+scratch/fs1	usedbydataset	32.9K	-
+scratch/fs1	usedbychildren	32.9K	-
+scratch/fs1	usedbyrefreservation	0B	-
+scratch/fs1	logbias	latency	default
+scratch/fs1	objsetid	168	-
+scratch/fs1	dedup	off	default
+scratch/fs1	mlslabel	none	default
+scratch/fs1	sync	standard	default
+scratch/fs1	dnodesize	legacy	default
+scratch/fs1	refcompressratio	1.00x	-
+scratch/fs1	written	0	-
+scratch/fs1	logicalused	24K	-
+scratch/fs1	logicalreferenced	12K	-
+scratch/fs1	volmode	default	default
+scratch/fs1	filesystem_limit	none	default
+scratch/fs1	snapshot_limit	none	default
+scratch/fs1	filesystem_count	none	default
+scratch/fs1	snapshot_count	none	default
+scratch/fs1	snapdev	hidden	default
+scratch/fs1	acltype	off	default
+scratch/fs1	context	none	default
+scratch/fs1	fscontext	none	default
+scratch/fs1	defcontext	none	default
+scratch/fs1	rootcontext	none	default
+scratch/fs1	relatime	on	default
+scratch/fs1	redundant_metadata	all	default
+scratch/fs1	overlay	on	default
+scratch/fs1	encryption	off	default
+scratch/fs1	keylocation	none	default
+scratch/fs1	keyformat	none	default
+scratch/fs1	pbkdf2iters	0	default
+scratch/fs1	special_small_blocks	0	default
+scratch/fs1	snapshots_changed	Sun Oct 18 11:28:59 2026	-
+scratch/fs1	prefetch	all	default
+scratch/fs1	direct	standard	default
+scratch/fs1	longname	off	default
+=REC=
+scratch	type	filesystem	-	-
+scratch	creation	Sun Oct 18 11:28 2026	-	-
+scratch	used	1.05G	-	-
+scratch	available	236M	-	-
+scratch	referenced	32.9K	-	-
+scratch	compressratio	1.00x	-	-
+scratch	mounted	yes	-	-
+scratch	quota	none	default	-
+scratch	reservation	none	default	-
+scratch	recordsize	128K	default	-
+scratch	mountpoint	/scratch	default	-
+scratch	sharenfs	off	default	-
+scratch	checksum	on	default	-
+scratch	compression	on	default	-
+scratch	atime	on	default	-
+scratch	devices	on	default	-
+scratch	exec	on	default	-
+scratch	setuid	on	default	-
+scratch	readonly	off	default	-
+scratch	zoned	off	default	-
+scratch	snapdir	hidden	default	-
+scratch	aclmode	discard	default	-
+scratch	aclinherit	restricted	default	-
+scratch	createtxg	1	-	-
+scratch	canmount	on	default	-
+scratch	xattr	on	default	-
+scratch	copies	1	default	-
+scratch	version	5	-	-
+scratch	utf8only	off	-	-
+scratch	normalization	none	-	-
+scratch	casesensitivity	sensitive	-	-
+scratch	vscan	off	default	-
+scratch	nbmand	off	default	-
+scratch	sharesmb	off	default	-
+scratch	refquota	none	default	-
+scratch	refreservation	none	default	-
+scratch	guid	2182973179194103614	-	-
+scratch	primarycache	all	default	-
+scratch	secondarycache	all	default	-
+scratch	usedbysnapshots	0B	-	-
+scratch	usedbydataset	32.9K	-	-
+scratch	usedbychildren	1.05G	-	-
+scratch	usedbyrefreservation	0B	-	-
+scratch	logbias	latency	default	-
+scratch	objsetid	54	-	-
+scratch	dedup	off	default	-
+scratch	mlslabel	none	default	-
+scratch	sync	standard	default	-
+scratch	dnodesize	legacy	default	-
+scratch	refcompressratio	1.00x	-	-
+scratch	written	32.9K	-	-
+scratch	logicalused	230K	-	-
+scratch	logicalreferenced	12K	-	-
+scratch	volmode	default	default	-
+scratch	filesystem_limit	none	default	-
+scratch	snapshot_limit	none	default	-
+scratch	filesystem_count	none	default	-
+scratch	snapshot_count	none	default	-
+scratch	snapdev	hidden	default	-
+scratch	acltype	off	default	-

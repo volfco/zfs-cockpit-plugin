@@ -1,0 +1,71 @@
+ZFS-CREATE(8)                System Manager's Manual              ZFS-CREATE(8)
+
+NAME
+       zfs-create — create ZFS dataset
+
+SYNOPSIS
+       zfs create [-Pnpuv] [-o property=value]… filesystem
+       zfs create [-ps] [-b blocksize] [-o property=value]… -V size volume
+
+DESCRIPTION
+       zfs create [-Pnpuv] [-o property=value]… filesystem
+         Creates  a  new  ZFS  file  system.   The file system is automatically
+         mounted according to the mountpoint property inherited from  the  par‐
+         ent, unless the -u option is used.
+
+         -o property=value
+             Sets   the   specified   property   as  if  the  command  zfs  set
+             property=value was invoked at the same time the dataset  was  cre‐
+             ated.  Any editable ZFS property can also be set at creation time.
+             Multiple  -o  options  can  be specified.  An error results if the
+             same property is specified in multiple -o options.
+
+         -p  Creates all the non-existing parent datasets.  Datasets created in
+             this manner are automatically mounted according to the  mountpoint
+             property  inherited  from their parent.  Any property specified on
+             the command line using the -o option is ignored.   If  the  target
+             filesystem already exists, the operation completes successfully.
+
+         -n  Do  a  dry-run  ("No-op")  creation.  No datasets will be created.
+             This is useful in conjunction with the -v or -P flags to  validate
+             properties  that  are  passed  via -o options and those implied by
+             other options.  The actual dataset creation can still fail due  to
+             insufficient privileges or available capacity.
+
+         -P  Print  machine-parsable  verbose  information  about  the  created
+             dataset.  Each line of output contains a key and one or  two  val‐
+             ues,  all separated by tabs.  The create_ancestors and create keys
+             have filesystem as their only  value.   The  create_ancestors  key
+             only  appears  if the -p option is used.  The property key has two
+             values, a property name that property's value.  The  property  key
+=X=
+troff:<standard input>:41: warning [p 1, 1.2i]: cannot break line
+ZPOOL-ADD(8)                 System Manager's Manual               ZPOOL-ADD(8)
+
+NAME
+       zpool-add — add vdevs to ZFS storage pool
+
+SYNOPSIS
+       zpool                            add                            [-fgLnP]
+             [--allow-in-use--allow-replication-mismatc--allow-ashift-mismatch]
+             [-o property=value] pool vdev…
+
+DESCRIPTION
+       Adds the specified virtual devices to the given pool.  The vdev specifi‐
+       cation  is described in the Virtual Devices section of zpoolconcepts(7).
+       The behavior of the -f option, and the device checks performed  are  de‐
+       scribed in the zpool create subcommand.
+
+       -f      Forces  use of vdevs, even if they appear in use, have conflict‐
+               ing ashift values, or specify a conflicting  replication  level.
+               Not all devices can be overridden in this manner.
+
+       -g      Display  vdev,  GUIDs instead of the normal device names.  These
+               GUIDs can be used in place of device names  for  the  zpool  de‐
+               tach/offline/remove/replace commands.
+
+       -L      Display real paths for vdevs resolving all symbolic links.  This
+               can  be used to look up the current block device name regardless
+               of the /dev/disk path used to open it.
+
+       -n      Displays the configuration that would be used  without  actually

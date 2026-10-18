@@ -1,0 +1,43 @@
+  pool: scratch
+ state: ONLINE
+config:
+
+	NAME                             STATE     READ WRITE CKSUM
+	scratch                          ONLINE       0     0     0
+	  raidz1-0                       ONLINE       0     0     0
+	    /tmp/zfs-fixtures/disk1.img  ONLINE       0     0     0
+	    /tmp/zfs-fixtures/disk2.img  ONLINE       0     0     0
+	    /tmp/zfs-fixtures/disk3.img  ONLINE       0     0     0
+	    /tmp/zfs-fixtures/disk4.img  ONLINE       0     0     0
+	logs	
+	  mirror-1                       ONLINE       0     0     0
+	    /tmp/zfs-fixtures/disk6.img  ONLINE       0     0     0
+	    /tmp/zfs-fixtures/disk7.img  ONLINE       0     0     0
+	cache
+	  /tmp/zfs-fixtures/disk8.img    ONLINE       0     0     0
+	spares
+	  /tmp/zfs-fixtures/disk5.img    AVAIL   
+
+errors: No known data errors
+=PLAIN=
+  pool: scratch
+ state: ONLINE
+config:
+
+	NAME                             STATE     READ WRITE CKSUM
+	scratch                          ONLINE       0     0     0
+	  raidz1-0                       ONLINE       0     0     0
+	    /tmp/zfs-fixtures/disk1.img  ONLINE       0     0     0
+	    /tmp/zfs-fixtures/disk2.img  ONLINE       0     0     0
+	    /tmp/zfs-fixtures/disk3.img  ONLINE       0     0     0
+	    /tmp/zfs-fixtures/disk4.img  ONLINE       0     0     0
+	logs	
+	  mirror-1                       ONLINE       0     0     0
+	    /tmp/zfs-fixtures/disk6.img  ONLINE       0     0     0
+	    /tmp/zfs-fixtures/disk7.img  ONLINE       0     0     0
+	cache
+	  /tmp/zfs-fixtures/disk8.img    ONLINE       0     0     0
+	spares
+	  /tmp/zfs-fixtures/disk5.img    AVAIL   
+
+errors: No known data errors

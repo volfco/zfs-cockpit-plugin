@@ -1,0 +1,61 @@
+ZFS-PROJECT(8)               System Manager's Manual             ZFS-PROJECT(8)
+
+NAME
+       zfs-project — manage projects in ZFS filesystem
+
+SYNOPSIS
+       zfs project [-d|-r] file|directory…
+       zfs project -C [-kr] file|directory…
+       zfs project -c [-0] [-d|-r] [-p id] file|directory…
+       zfs project [-p id] [-rs] file|directory…
+
+DESCRIPTION
+       zfs project [-d|-r] file|directory…
+         List  project  identifier  (ID) and inherit flag of files and directo‐
+         ries.
+
+         -d  Show the directory project ID and inherit flag, not its children.
+
+         -r  List subdirectories recursively.
+
+       zfs project -C [-kr] file|directory…
+         Clear project inherit flag and/or ID on the files and directories.
+
+         -k  Keep the project ID unchanged.  If not specified, the  project  ID
+             will be reset to zero.
+
+         -r  Clear subdirectories' flags recursively.
+
+       zfs project -c [-0] [-d|-r] [-p id] file|directory…
+         Check project ID and inherit flag on the files and directories: report
+         entries  without the project inherit flag, or with project IDs differ‐
+         ent from the target directory's project ID or the one  specified  with
+         -p.
+
+         -0     Delimit  filenames  with  a  NUL byte instead of newline, don't
+                output diagnoses.
+
+         -d     Check the directory project ID and inherit flag, not its  chil‐
+                dren.
+
+         -p id  Compare  to  id  instead  of  the target files and directories'
+                project IDs.
+
+         -r     Check subdirectories recursively.
+
+       zfs project -p id [-rs] file|directory…
+         Set project ID and/or inherit flag on the files and directories.
+
+         -p id  Set the project ID to the given value.
+
+         -r     Set on subdirectories recursively.
+
+         -s     Set project inherit flag on the given  files  and  directories.
+                This  is  usually  used for setting up tree quotas with -r.  In
+                that case, the directory's project ID will be set for  all  its
+                descendants, unless specified explicitly with -p.
+
+SEE ALSO
+       zfs-projectspace(8)
+
+OpenZFS                           May 27, 2021                   ZFS-PROJECT(8)

@@ -1,0 +1,47 @@
+ZPOOL-OFFLINE(8)             System Manager's Manual           ZPOOL-OFFLINE(8)
+
+NAME
+       zpool-offline — take physical devices offline in ZFS storage pool
+
+SYNOPSIS
+       zpool offline [--power|[-ft]] pool device…
+       zpool online [--power] [-e] pool device…
+
+DESCRIPTION
+       zpool offline [--power|[-ft]] pool device…
+               Takes  the  specified physical device offline.  While the device
+               is offline, no attempt is made to read or write to  the  device.
+               This command is not applicable to spares.
+
+               --power
+                       Power  off  the  device's slot in the storage enclosure.
+                       This flag currently works on Linux only
+
+               -f      Force fault.  Instead of offlining the disk, put it into
+                       a faulted state.  The fault will persist across  imports
+                       unless the -t flag was specified.
+
+               -t      Temporary.   Upon  reboot, the specified physical device
+                       reverts to its previous state.
+
+       zpool online [--power] [-e] pool device…
+               Brings the specified physical device online.   This  command  is
+               not applicable to spares.
+
+               --power
+                       Power  on the device's slot in the storage enclosure and
+                       wait for the device to show up before attempting to  on‐
+                       line    it.     Alternatively,    you    can   set   the
+                       ZPOOL_AUTO_POWER_ON_SLOT environment variable to  always
+                       enable  this  behavior.   This  flag  currently works on
+                       Linux only
+
+               -e      Expand the device to use all available  space.   If  the
+                       device  is  part  of  a mirror or raidz then all devices
+                       must be expanded before the new space will become avail‐
+                       able to the pool.
+
+SEE ALSO
+       zpool-detach(8), zpool-remove(8), zpool-reopen(8), zpool-resilver(8)
+
+OpenZFS                          August 9, 2019                ZPOOL-OFFLINE(8)

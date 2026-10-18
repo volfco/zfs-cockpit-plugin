@@ -1,0 +1,15 @@
+scratch	filesystem	1.05G	236M	32.9K	/scratch	on	-
+scratch/clone1	filesystem	0B	236M	32.9K	/scratch/clone1	on	-
+scratch/enc	filesystem	223K	236M	112K	/scratch/enc	on	available
+scratch/enc/child	filesystem	111K	236M	111K	/scratch/enc/child	on	available
+scratch/fs1	filesystem	65.8K	236M	32.9K	/mnt/scratch/fs1	on	-
+scratch/fs1@snap1	snapshot	0B	-	32.9K	-	-	-
+scratch/fs1@snap2	snapshot	0B	-	32.9K	-	-	-
+scratch/fs1#bm1	bookmark	-	-	32.9K	-	-	-
+scratch/fs1/sub	filesystem	32.9K	236M	32.9K	/mnt/scratch/fs1/sub	noauto	-
+scratch/vm	volume	1.05G	1.28G	18.0K	-	-	-
+=S=
+scratch/fs1@snap1	0B	-	32.9K	32.9K
+scratch/fs1@snap2	0B	-	32.9K	0
+=B=
+scratch/fs1#bm1	-	-	32.9K

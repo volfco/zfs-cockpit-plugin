@@ -1,0 +1,23 @@
+ZPOOL-HISTORY(8)             System Manager's Manual           ZPOOL-HISTORY(8)
+
+NAME
+       zpool-history — inspect command history of ZFS storage pools
+
+SYNOPSIS
+       zpool history [-il] [pool]…
+
+DESCRIPTION
+       Displays the command history of the specified pool(s) or all pools if no
+       pool is specified.
+
+       -i      Displays internally logged ZFS events in addition to user initi‐
+               ated events.
+
+       -l      Displays  log records in long format, which in addition to stan‐
+               dard format includes, the user name, the hostname, and the  zone
+               in which the operation was performed.
+
+SEE ALSO
+       zpool-checkpoint(8), zpool-events(8), zpool-status(8), zpool-wait(8)
+
+OpenZFS                          August 9, 2019                ZPOOL-HISTORY(8)

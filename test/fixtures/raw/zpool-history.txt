@@ -1,0 +1,48 @@
+History for 'scratch':
+2026-10-18.11:28:30 zpool create -f scratch raidz1 /tmp/zfs-fixtures/disk1.img /tmp/zfs-fixtures/disk2.img /tmp/zfs-fixtures/disk3.img /tmp/zfs-fixtures/disk4.img -o comment=cockpit-plugin-fixture
+2026-10-18.11:28:31 zpool add scratch spare /tmp/zfs-fixtures/disk5.img
+2026-10-18.11:28:31 zpool add scratch log mirror /tmp/zfs-fixtures/disk6.img /tmp/zfs-fixtures/disk7.img
+2026-10-18.11:28:31 zpool add scratch cache /tmp/zfs-fixtures/disk8.img
+2026-10-18.11:28:59 zfs create -o compression=lz4 -o quota=2G -o recordsize=128K -o mountpoint=/mnt/scratch/fs1 scratch/fs1
+2026-10-18.11:28:59 zfs create -o atime=off scratch/fs1/sub
+2026-10-18.11:28:59 zfs create -V 1G -o volblocksize=16K scratch/vm
+2026-10-18.11:28:59 zfs snapshot scratch/fs1@snap1
+2026-10-18.11:28:59 zfs snapshot scratch/fs1@snap2
+2026-10-18.11:28:59 zfs clone scratch/fs1@snap1 scratch/clone1
+2026-10-18.11:28:59 zfs bookmark scratch/fs1@snap2 scratch/fs1#bm1
+2026-10-18.11:28:59 zfs hold keep scratch/fs1@snap1
+2026-10-18.11:29:05 zfs create -o encryption=aes-256-gcm -o keyformat=raw -o keylocation=file:///tmp/zfs-fixtures/key scratch/enc
+2026-10-18.11:29:05 zfs create scratch/enc/child
+2026-10-18.11:29:05 zfs set canmount=noauto scratch/fs1/sub
+
+=I=
+
+2026-10-18.11:28:59 zfs bookmark scratch/fs1@snap2 scratch/fs1#bm1
+2026-10-18.11:28:59 [txg:33] hold scratch/fs1@snap1 (190) tag=keep temp=0 refs=1
+2026-10-18.11:28:59 (4ms) ioctl hold
+    input:
+        holds:
+            scratch/fs1@snap1: 'keep'
+
+2026-10-18.11:28:59 zfs hold keep scratch/fs1@snap1
+2026-10-18.11:29:05 [txg:35] create scratch/enc (516)  
+2026-10-18.11:29:05 [txg:36] set scratch/enc (516) keylocation=file:///tmp/zfs-fixtures/key
+2026-10-18.11:29:05 (12ms) ioctl create
+    input:
+        type: 2
+        props:
+            encryption: 8
+            keyformat: 1
+            keylocation: 'file:///tmp/zfs-fixtures/key'
+
+2026-10-18.11:29:05 zfs create -o encryption=aes-256-gcm -o keyformat=raw -o keylocation=file:///tmp/zfs-fixtures/key scratch/enc
+2026-10-18.11:29:05 [txg:37] create scratch/enc/child (643)  
+2026-10-18.11:29:05 (10ms) ioctl create
+    input:
+        type: 2
+        props:
+
+2026-10-18.11:29:05 zfs create scratch/enc/child
+2026-10-18.11:29:05 [txg:39] set scratch/fs1/sub (178) canmount=2
+2026-10-18.11:29:05 zfs set canmount=noauto scratch/fs1/sub
+

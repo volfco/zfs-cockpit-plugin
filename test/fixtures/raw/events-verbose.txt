@@ -1,0 +1,14 @@
+        eid = 0x6a
+
+Oct 18 2026 11:30:49.536230777	sysevent.fs.zfs.config_sync
+        version = 0x0
+        class = "sysevent.fs.zfs.config_sync"
+        pool = "scratch"
+        pool_guid = 0x0
+        pool_state = 0x5
+        pool_context = 0x0
+        time = 0x6ad51059 0x1ff63b79 
+        eid = 0x6b
+
+=C=
+cleared 107 events

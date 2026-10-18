@@ -1,0 +1,5 @@
+full	scratch/fs1@snap1	12912
+size	12912
+=INC=
+incremental	scratch/fs1@snap1	scratch/fs1@snap2	624
+size	624

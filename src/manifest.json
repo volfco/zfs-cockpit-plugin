@@ -1,0 +1,14 @@
+{
+    "requires": {
+        "cockpit": "137"
+    },
+
+    "tools": {
+        "index": {
+            "label": "ZFS",
+            "keywords": [
+                { "matches": ["zfs", "zpool", "pool", "dataset", "storage", "scrub", "snapshot"] }
+            ]
+        }
+    }
+}

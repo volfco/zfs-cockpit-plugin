@@ -1,0 +1,54 @@
+The following filesystem versions are supported:
+
+VER  DESCRIPTION
+---  --------------------------------------------------------
+ 1   Initial ZFS filesystem version
+ 2   Enhanced directory entries
+ 3   Case insensitive and filesystem user identifier (FUID)
+ 4   userquota, groupquota properties
+ 5   System attributes
+
+For more information on a particular version, including supported releases,
+see the ZFS Administration Guide.
+
+=ZP=
+This system supports ZFS pool feature flags.
+
+The following features are supported:
+
+FEAT DESCRIPTION
+-------------------------------------------------------------
+async_destroy                         (read-only compatible)
+     Destroy filesystems asynchronously.
+empty_bpobj                           (read-only compatible)
+     Snapshots use less space.
+lz4_compress                         
+     LZ4 compression algorithm support.
+multi_vdev_crash_dump                
+     Crash dumps to multiple vdev pools.
+spacemap_histogram                    (read-only compatible)
+     Spacemaps maintain space histograms.
+enabled_txg                           (read-only compatible)
+     Record txg at which a feature is enabled
+hole_birth                           
+     Retain hole birth txg for more precise zfs send
+extensible_dataset                   
+     Enhanced dataset functionality, used by other features.
+embedded_data                        
+     Blocks which compress very well use even less space.
+bookmarks                             (read-only compatible)
+     "zfs bookmark" command
+filesystem_limits                     (read-only compatible)
+     Filesystem and snapshot limits.
+large_blocks                         
+     Support for blocks larger than 128KB.
+large_dnode                          
+     Variable on-disk size of dnodes.
+sha512                               
+     SHA-512/256 hash algorithm.
+skein                                
+     Skein hash algorithm.
+edonr                                
+     Edon-R hash algorithm.
+userobj_accounting                    (read-only compatible)
+     User/Group object accounting.

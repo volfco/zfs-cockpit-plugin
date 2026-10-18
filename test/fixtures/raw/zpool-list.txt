@@ -1,0 +1,19 @@
+NAME                              SIZE  ALLOC   FREE  CKPOINT  EXPANDSZ   FRAG    CAP  DEDUP    HEALTH  ALTROOT
+scratch                          1.88G   976K  1.87G        -         -     4%     0%  1.00x    ONLINE  -
+  raidz1-0                       1.88G   976K  1.87G        -         -     4%  0.04%      -    ONLINE
+    /tmp/zfs-fixtures/disk1.img   512M      -      -        -         -      -      -      -    ONLINE
+    /tmp/zfs-fixtures/disk2.img   512M      -      -        -         -      -      -      -    ONLINE
+    /tmp/zfs-fixtures/disk3.img   512M      -      -        -         -      -      -      -    ONLINE
+    /tmp/zfs-fixtures/disk4.img   512M      -      -        -         -      -      -      -    ONLINE
+logs                                 -      -      -        -         -      -      -      -         -
+  mirror-1                        480M      0   480M        -         -     0%  0.00%      -    ONLINE
+    /tmp/zfs-fixtures/disk6.img   512M      -      -        -         -      -      -      -    ONLINE
+    /tmp/zfs-fixtures/disk7.img   512M      -      -        -         -      -      -      -    ONLINE
+cache                                -      -      -        -         -      -      -      -         -
+  /tmp/zfs-fixtures/disk8.img     512M     6K   507M        -         -     0%  0.00%      -    ONLINE
+spare                                -      -      -        -         -      -      -      -         -
+  /tmp/zfs-fixtures/disk5.img     512M      -      -        -         -      -      -      -     AVAIL
+=H=
+scratch	2013265920	999424	2012266496	-	-	4	0	1.00	ONLINE	-
+=H-O=
+scratch	1.88G	976K	1.87G	-	-	4%	0%	1.00x	ONLINE	off	cockpit-plugin-fixture

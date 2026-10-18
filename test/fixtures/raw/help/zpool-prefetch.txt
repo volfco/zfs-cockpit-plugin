@@ -1,0 +1,15 @@
+ZPOOL-PREFETCH(8)            System Manager's Manual          ZPOOL-PREFETCH(8)
+
+NAME
+       zpool-prefetch — Loads specific types of data for the given pool
+
+SYNOPSIS
+       zpool prefetch -t type pool
+
+DESCRIPTION
+       zpool prefetch -t ddt pool
+               Prefetch  data  of  a specific type for the given pool; specifi‐
+               cally the DDT, which will improve write I/O performance when the
+               DDT is resident in the ARC.
+
+OpenZFS                        February 14, 2024              ZPOOL-PREFETCH(8)

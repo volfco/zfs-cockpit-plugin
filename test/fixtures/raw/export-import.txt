@@ -1,0 +1,51 @@
+=IMPORT=
+  pool: hdd0
+    id: 7202412747075044166
+ state: UNAVAIL
+status: One or more devices contains corrupted data.
+action: The pool cannot be imported due to damaged devices or data.
+   see: https://openzfs.github.io/openzfs-docs/msg/ZFS-8000-5E
+config:
+
+	hdd0                                           UNAVAIL  insufficient replicas
+	  mirror-0                                     ONLINE
+	    sdm                                        ONLINE
+	    sdk                                        ONLINE
+	  mirror-1                                     UNAVAIL  insufficient replicas
+	    wwn-0xT5000LM000-2AN170_WCJ2WP3S           UNAVAIL
+	    wwn-0xT5000LM000-2AN170_WCJ2VH6B           UNAVAIL
+	  mirror-2                                     DEGRADED
+	    sdo                                        ONLINE
+	    wwn-0xDC_WD40NPZZ-00PDPT0_WD-WX41E493KUW0  UNAVAIL
+	  mirror-3                                     ONLINE
+	    sdn                                        ONLINE
+	    sdq                                        ONLINE
+	  indirect-4                                   ONLINE
+	  indirect-5                                   ONLINE
+	  mirror-6                                     DEGRADED
+	    wwn-0xT4000LM024-2AN17V_WCK0QVZM           UNAVAIL
+	    sdp                                        ONLINE
+
+  pool: ssd1
+    id: 3511725845866588333
+ state: DEGRADED
+status: One or more devices contains corrupted data.
+action: The pool can be imported despite missing or damaged devices.  The
+	fault tolerance of the pool may be compromised if imported.
+   see: https://openzfs.github.io/openzfs-docs/msg/ZFS-8000-4J
+config:
+
+	ssd1                        DEGRADED
+	  raidz2-0                  DEGRADED
+	    sdj                     ONLINE
+	    sdd                     ONLINE
+	    sde                     ONLINE
+	    sda                     ONLINE
+	    sdc                     ONLINE
+	    sdi                     ONLINE
+	    sdg                     ONLINE
+	    sdb                     ONLINE
+	    scsi-358ce38ee204afda9  UNAVAIL
+=DO=
+cannot import 'scratch': no such pool available
+no pools available

@@ -1,0 +1,172 @@
+usage: zfs command args ...
+where 'command' is one of the following:
+
+	version [-j]
+
+	create [-Pnpuv] [-o property=value] ... <filesystem>
+	create [-Pnpsv] [-b blocksize] [-o property=value] ... -V <size> <volume>
+	destroy [-fnpRrv] <filesystem|volume>
+	destroy [-dnpRrv] <filesystem|volume>@<snap>[%<snap>][,...]
+	destroy <filesystem|volume>#<bookmark>
+
+	snapshot [-r] [-o property=value] ... <filesystem|volume>@<snap> ...
+	rollback [-rRf] <snapshot>
+	clone [-p] [-o property=value] ... <snapshot> <filesystem|volume>
+	promote <clone-filesystem>
+	rename [-f] <filesystem|volume|snapshot> <filesystem|volume|snapshot>
+	rename -p [-f] <filesystem|volume> <filesystem|volume>
+	rename -u [-f] <filesystem> <filesystem>
+	rename -r <snapshot> <snapshot>
+	bookmark <snapshot|bookmark> <newbookmark>
+	diff [-FHth] <snapshot> [snapshot|filesystem]
+
+	list [-Hp] [-j [--json-int]] [-r|-d max] [-o property[,...]] [-s property]...
+	    [-S property]... [-t type[,...]] [filesystem|volume|snapshot] ...
+
+	set [-u] <property=value> ... <filesystem|volume|snapshot> ...
+	get [-rHp] [-j [--json-int]] [-d max] [-o "all" | field[,...]]
+	    [-t type[,...]] [-s source[,...]]
+	    <"all" | property[,...]> [filesystem|volume|snapshot|bookmark] ...
+	inherit [-rS] <property> <filesystem|volume|snapshot> ...
+	upgrade [-v]
+	upgrade [-r] [-V version] <-a | filesystem ...>
+
+	userspace [-Hinp] [-o field[,...]] [-s field] ...
+	    [-S field] ... [-t type[,...]] <filesystem|snapshot|path>
+	groupspace [-Hinp] [-o field[,...]] [-s field] ...
+	    [-S field] ... [-t type[,...]] <filesystem|snapshot|path>
+	projectspace [-Hp] [-o field[,...]] [-s field] ... 
+	    [-S field] ... <filesystem|snapshot|path>
+
+	project [-d|-r] <directory|file ...>
+	project -c [-0] [-d|-r] [-p id] <directory|file ...>
+	project -C [-k] [-r] <directory ...>
+	project [-p id] [-r] [-s] <directory ...>
+
+	mount [-j]
+	mount [-flvO] [-o opts] <-a|-R filesystem|filesystem>
+	unmount [-fu] <-a | filesystem|mountpoint>
+	share [-l] <-a [nfs|smb] | filesystem>
+	unshare <-a [nfs|smb] | filesystem|mountpoint>
+
+	send [-DLPbcehnpsVvw] [-i|-I snapshot]
+	     [-R [-X dataset[,dataset]...]]     <snapshot>
+	send [-DnVvPLecw] [-i snapshot|bookmark] <filesystem|volume|snapshot>
+	send [-DnPpVvLec] [-i bookmark|snapshot] --redact <bookmark> <snapshot>
+	send [-nVvPe] -t <receive_resume_token>
+	send [-PnVv] --saved filesystem
+	receive [-vMnsFhu] [-o <property>=<value>] ... [-x <property>] ...
+	    <filesystem|volume|snapshot>
+	receive [-vMnsFhu] [-o <property>=<value>] ... [-x <property>] ... 
+	    [-d | -e] <filesystem>
+	receive -A <filesystem|volume>
+	redact <snapshot> <bookmark> <redaction_snapshot> ...
+
+	allow <filesystem|volume>
+	allow [-ldug] <"everyone"|user|group>[,...] <perm|@setname>[,...]
+	    <filesystem|volume>
+	allow [-ld] -e <perm|@setname>[,...] <filesystem|volume>
+	allow -c <perm|@setname>[,...] <filesystem|volume>
+	allow -s @setname <perm|@setname>[,...] <filesystem|volume>
+	unallow [-rldug] <"everyone"|user|group>[,...]
+	    [<perm|@setname>[,...]] <filesystem|volume>
+	unallow [-rld] -e [<perm|@setname>[,...]] <filesystem|volume>
+	unallow [-r] -c [<perm|@setname>[,...]] <filesystem|volume>
+	unallow [-r] -s @setname [<perm|@setname>[,...]] <filesystem|volume>
+
+	hold [-r] <tag> <snapshot> ...
+	holds [-rHp] <snapshot> ...
+	release [-r] <tag> <snapshot> ...
+
+	load-key [-rn] [-L <keylocation>] <-a | filesystem|volume>
+	unload-key [-r] <-a | filesystem|volume>
+	change-key [-l] [-o keyformat=<value>]
+	    [-o keylocation=<value>] [-o pbkdf2iters=<value>]
+	    <filesystem|volume>
+	change-key -i [-l] <filesystem|volume>
+
+	program [-jn] [-t <instruction limit>] [-m <memory limit (b)>]
+	    <pool> <program file> [lua args...]
+	rewrite [-rvx] [-o <offset>] [-l <length>] <directory|file ...>
+	wait [-t <activity>] <filesystem>
+
+	zone <nsfile> <filesystem>
+	unzone <nsfile> <filesystem>
+
+Each dataset is of the form: pool/[dataset/]*dataset[@name]
+
+For the property list, run: zfs set|get
+
+For the delegated permission list, run: zfs allow|unallow
+
+For further help on a command or topic, run: zfs help [<topic>]
+=ZPOOL=
+usage: zpool command args ...
+where 'command' is one of the following:
+
+	version [-j]
+
+	create [-fnd] [-o property=value] ... 
+	    [-O file-system-property=value] ... 
+	    [-m mountpoint] [-R root] <pool> <vdev> ...
+	destroy [-f] <pool>
+
+	add [-afgLnP] [-o property=value] <pool> <vdev> ...
+	remove [-npsw] <pool> <device> ...
+
+	labelclear [-f] <vdev>
+
+	checkpoint [-d [-w]] <pool> ...
+	prefetch -t <type> [<type opts>] <pool>
+	    -t ddt <pool>
+
+	list [-gHLpPv] [-o property[,...]] [-j [--json-int, --json-pool-key-guid]] ...
+	    [-T d|u] [pool] [interval [count]]
+	iostat [[[-c [script1,script2,...][-lq]]|[-rw]] [-T d | u] [-ghHLpPvy]
+	    [[pool ...]|[pool vdev ...]|[vdev ...]] [[-n] interval [count]]
+	status [-DdegiLPpstvx] [-c script1[,script2,...]] ...
+	    [-j|--json [--json-flat-vdevs] [--json-int] [--json-pool-key-guid]] ...
+	    [-T d|u] [--power] [pool] [interval [count]]
+
+	online [--power][-e] <pool> <device> ...
+	offline [--power]|[[-f][-t]] <pool> <device> ...
+	clear [[--power]|[-nF]] <pool> [device]
+	reopen [-n] <pool>
+
+	attach [-fsw] [-o property=value] <pool> <device> <new-device>
+	detach <pool> <device>
+	replace [-fsw] [-o property=value] <pool> <device> [new-device]
+	split [-gLnPl] [-R altroot] [-o mntopts]
+	    [-o property=value] <pool> <newpool> [<device> ...]
+
+	initialize [-c | -s | -u] [-w] <pool> [<device> ...]
+	resilver <pool> ...
+	scrub [-e | -s | -p | -C] [-w] <pool> ...
+	trim [-dw] [-r <rate>] [-c | -s] <pool> [<device> ...]
+
+	import [-d dir] [-D]
+	import [-o mntopts] [-o property=value] ... 
+	    [-d dir | -c cachefile] [-D] [-l] [-f] [-m] [-N] [-R root] [-F [-n]] -a
+	import [-o mntopts] [-o property=value] ... 
+	    [-d dir | -c cachefile] [-D] [-l] [-f] [-m] [-N] [-R root] [-F [-n]]
+	    [--rewind-to-checkpoint] <pool | id> [newpool]
+	export [-af] <pool> ...
+	upgrade
+	upgrade -v
+	upgrade [-V version] <-a | pool ...>
+	reguid [-g guid] <pool>
+
+	history [-il] [<pool>] ...
+	events [-vHf [pool] | -c]
+
+	get [-Hp] [-j [--json-int, --json-pool-key-guid]] ...
+	    [-o "all" | field[,...]] <"all" | property[,...]> <pool> ...
+	set <property=value> <pool>
+	set <vdev_property=value> <pool> <vdev>
+	sync [pool] ...
+
+	wait [-Hp] [-T d|u] [-t <activity>[,...]] <pool> [interval]
+
+	ddtprune -d|-p <amount> <pool>
+
+For further help on a command or topic, run: zpool help [<topic>]
