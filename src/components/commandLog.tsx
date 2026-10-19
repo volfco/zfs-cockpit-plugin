@@ -86,7 +86,7 @@ function CommandLogEntryView({ entry }: { entry: CommandLogEntry }) {
                             variant="plain"
                             aria-label={_("Copy")}
                             icon={<CopyIcon />}
-                            onClick={() => navigator.clipboard?.writeText(renderBash(entry))}
+                            onClick={() => navigator.clipboard?.writeText(renderBash(entry))?.catch(() => undefined)}
                         />
                     }
                 >

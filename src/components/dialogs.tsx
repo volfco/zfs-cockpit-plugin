@@ -87,7 +87,8 @@ interface FormDialogProps {
     fields: FieldDef[];
     submitLabel?: string;
     submitVariant?: 'primary' | 'danger' | 'warning';
-    requireTyped?: string;
+    // A function gates on form values (e.g. only destructive when a switch is on).
+    requireTyped?: string | ((values: FormValues) => string | undefined);
     onSubmit: (values: FormValues) => Promise<string>;
     onSuccess?: () => void;
 }
@@ -141,7 +142,8 @@ export function FormDialog({
             .filter(isVisible)
             .some(f => f.required && (values[f.key] === undefined || values[f.key] === ''));
 
-    const typedOk = !requireTyped || typed === requireTyped;
+    const requireTypedName = typeof requireTyped === 'function' ? requireTyped(values) : requireTyped;
+    const typedOk = !requireTypedName || typed === requireTypedName;
 
     return (
         <Modal
@@ -191,8 +193,8 @@ export function FormDialog({
                                     )}
                                 </FormGroup>
                             ))}
-                            {requireTyped && (
-                                <FormGroup label={cockpit.format(_("Type \"$0\" to confirm"), requireTyped)} fieldId={`${dialogId}-confirm-typed`}>
+                            {requireTypedName && (
+                                <FormGroup label={cockpit.format(_("Type \"$0\" to confirm"), requireTypedName)} fieldId={`${dialogId}-confirm-typed`}>
                                     <TextInput id={`${dialogId}-confirm-typed`} value={typed} onChange={(_e, v) => setTyped(v)} />
                                 </FormGroup>
                             )}

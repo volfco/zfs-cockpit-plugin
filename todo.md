@@ -15,3 +15,5 @@
 
 - [ ] Packaging gaps not verifiable locally: lintian pass on the .deb, Arch `makepkg` build, spec `rebuild_bundle` opt-in branch. Ref: decisions.md D11.
 - [ ] Re-add `%doc README.md` to debian/docs + PKGBUILD docs array if desired (spec now has it; deb/arch currently ship no README). Ref: packaging/.
+
+- [ ] Review nits deferred: TableCaption duplicated (app/poolsPage/datasetsPage), `errText` not exported (error mapping repeated ~15x), `parseUsageRows` lives in service.ts not zfs.ts, `vdevType` misses draid config-form names (`draid2:2d:6c:0s-0`), events follow re-parses full log every 2s (unbounded), Unshare `-a [nfs|smb]` only reachable via wrapper/raw console (dialog is target-only). Ref: quality review.

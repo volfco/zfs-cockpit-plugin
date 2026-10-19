@@ -6,6 +6,7 @@ import { readFileSync } from 'node:fs';
 import {
     parseZpoolStatus, parseZpoolList, parseZpoolIostat, parseZpoolGet,
     parseZpoolHistory, parseZpoolEvents, parseZpoolImport, parsePoolScan,
+    vdevType,
 } from '../src/zpool.ts';
 import {
     parseZfsList, parseZfsGet, parseZfsSpace, parseZfsHolds,
@@ -210,7 +211,7 @@ function sections(text) {
     check(verbose.some(e => (e.detail || '').includes('pool = "scratch"')), 'events: -v details');
 }
 
-// --- space / diff / upgrade --------------------------------------------------
+// --- space / upgrade --------------------------------------------------------
 {
     // zfs-space.txt captured `zfs space`, which is not a subcommand; error
     // text must not parse into rows. Real form is `zfs list -H -o space`.
@@ -218,12 +219,51 @@ function sections(text) {
     // synthetic: `zfs list -H -o space` row
     const space = parseZfsSpace('scratch/fs1\t236M\t65.8K\t0B\t32.9K\t0B\t0B');
     check(space[0].usedByRefreservation === '0B' && space[0].avail === '236M', 'space: row parse');
-    // zfs-diff.txt captured a permissions error; prose must not parse either
-    check(parseZfsDiff(raw('zfs-diff.txt')).length === 0, 'diff: error text yields no rows');
     const up = parseZfsUpgrade(raw('upgrade-versions.txt'));
     check(up.versions.includes('1') && up.versions.includes('5'), 'upgrade: filesystem versions');
     check(up.features.includes('async_destroy') && up.features.includes('userobj_accounting'),
         'upgrade: pool features');
+}
+
+// --- zfs diff: plain and -t tab forms (zfs-diff.txt real captures) -----------
+{
+    const fix = sections(raw('zfs-diff.txt'));
+    const plain = parseZfsDiff(fix.PLAIN);
+    check(plain.length === 5, `diff plain: 5 rows, got ${plain.length}`);
+    check(plain[0].change === 'M' && plain[0].path === '/mnt/scratch/fs1/'
+        && plain[0].timestamp === undefined && plain[0].fileType === undefined,
+    'diff plain: first row');
+    check(plain[1].change === '+' && plain[1].path === '/mnt/scratch/fs1/dir1',
+        'diff plain: added dir');
+    const ht = parseZfsDiff(fix.HT);
+    check(ht.length === 5, `diff -H -t: 5 rows, got ${ht.length}`);
+    check(typeof ht[0].timestamp === 'string' && ht[0].timestamp === '1792367286.480996292',
+        'diff -H -t: timestamp preserved as string');
+    check(ht[0].change === 'M' && ht[0].fileType === '/' && ht[1].fileType === '/',
+        'diff -H -t: change M + dir type /');
+    check(ht[2].change === '+' && ht[2].fileType === 'F'
+        && ht[2].path === '/mnt/scratch/fs1/dir1/nested.txt',
+    'diff -H -t: change + + file type F');
+    check(ht[3].timestamp === '1792367286.456996160', 'diff -H -t: per-row timestamps');
+    const single = parseZfsDiff(fix.HTSINGLE);
+    check(single.length === 5 && single[0].timestamp === '1792367286.480996292'
+        && single[0].change === 'M' && single[0].path === '/mnt/scratch/fs1/'
+        && single[0].fileType === undefined, 'diff -H -t without -F: 3-field rows');
+}
+
+// --- replacing-1 pseudo-vdev nested in raidz (mid-resilver capture) ---------
+{
+    const [pool] = parseZpoolStatus(sections(raw('replacing-capture.txt'))['']);
+    check(pool && pool.name === 'scratch' && pool.state === 'ONLINE', 'replacing: pool row');
+    const raidz = pool.vdevs[0].children[0];
+    check(raidz.name === 'raidz1-0' && raidz.children.length === 4, 'replacing: raidz1-0 leaves');
+    const replacing = raidz.children[1];
+    check(replacing.name === 'replacing-1' && replacing.type === 'replacing'
+        && replacing.children.length === 2
+        && replacing.children[0].name === '/tmp/zfs-fixtures/disk2.img'
+        && replacing.children[1].name === '/tmp/zfs-fixtures/disk10.img',
+    'replacing: replacing-1 with two children nested in raidz1-0');
+    check(vdevType('draid2-0') === 'draid', 'vdevType: draid');
 }
 
 if (failures) {

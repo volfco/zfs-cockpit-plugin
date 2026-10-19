@@ -26,7 +26,10 @@ export function vdevType(name: string): VdevType {
     if (/^raidz1-\d+$/.test(name)) return 'raidz1';
     if (/^raidz2-\d+$/.test(name)) return 'raidz2';
     if (/^raidz3-\d+$/.test(name)) return 'raidz3';
-    if (/^(raidz|draid)\d*-\d+$/.test(name)) return 'raidz';
+    if (/^raidz\d*-\d+$/.test(name)) return 'raidz';
+    // shortcut: draid config names like draid2:2d:6c:0s-0 are not matched,
+    // upgrade when a live capture shows them in zpool status output
+    if (/^draid\d*-\d+$/.test(name)) return 'draid';
     if (/^replacing-\d+$/.test(name)) return 'replacing';
     if (/^spare-\d+$/.test(name)) return 'spare';
     if (/^indirect-\d+$/.test(name)) return 'indirect';

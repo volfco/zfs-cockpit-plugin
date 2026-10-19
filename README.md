@@ -24,7 +24,7 @@ Every `zfs` and `zpool` subcommand is reachable, in three layers:
    combined flags), with every command recorded in the command log.
 
 Also included: pool status with vdev tree and scan progress, `zpool events`
-(live follow), `zpool history`, iostat data, an auditable command log of every
+(live follow), `zpool history`, an auditable command log of every
 operation the plugin runs, and OpenZFS-version capability gating (targets
 OpenZFS ≥ 2.2; commands the running version lacks are disabled with an
 explanation).

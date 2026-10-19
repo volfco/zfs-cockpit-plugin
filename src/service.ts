@@ -220,28 +220,27 @@ function commaList(values: string | string[]): string {
 // Version & capability gating
 // ---------------------------------------------------------------------------
 
-// Minimum OpenZFS version (major, minor) that introduced each capability,
-// from the per-subcommand captures in test/fixtures/raw/help/. Capabilities
-// without a pinned baseline (zpool.rewind) are assumed present: an unknown
-// baseline must not hide UI entries.
+// Minimum known version that provides each capability; conservative (hides
+// on doubt). Capabilities without a pinned baseline (zpool.rewind) are
+// assumed present: an unknown baseline must not hide UI entries.
 const CAPABILITY_MIN_VERSION: Record<string, [number, number]> = {
     'zpool.wait': [2, 1],
     'zpool.resilver': [2, 2],
     'zpool.prefetch': [2, 3],
     'zpool.ddtprune': [2, 3],
-    'zpool.trim': [2, 0],
-    'zpool.initialize': [2, 0],
+    'zpool.trim': [0, 8],
+    'zpool.initialize': [0, 8],
     'zpool.checkpoint': [0, 8],
-    'zpool.split': [0, 8],
+    'zpool.split': [0, 7],
     'zpool.status-json': [2, 3],
     'zfs.wait': [2, 1],
     'zfs.redact': [2, 0],
     'zfs.rewrite': [2, 3],
     'zfs.program': [0, 7],
-    'zfs.bookmark': [0, 8],
+    'zfs.bookmark': [0, 7],
     'zfs.send-redact': [2, 0],
     'zfs.change-key': [0, 8],
-    'zfs.project': [2, 0],
+    'zfs.project': [0, 7],
 };
 
 export const CAPABILITY_LIST: string[] = [
@@ -284,10 +283,10 @@ export async function refreshVersion(): Promise<ZfsVersion> {
 
 // zpool list columns fetched per pool (CLI spellings). parseZpoolList maps
 // them positionally to its own column names.
-const POOL_LIST_COLUMNS = 'name,size,alloc,free,checkpoint,expandsz,fragmentation,cap,dedup,health,altroot';
+const POOL_LIST_COLUMNS = 'name,size,alloc,free,checkpoint,expandsz,fragmentation,cap,dedup,health,altroot,autotrim,comment';
 const POOL_LIST_PARSE_COLUMNS = [
     'name', 'size', 'alloc', 'free', 'checkpoint', 'expandsize', 'frag',
-    'cap', 'dedup', 'health', 'altroot',
+    'cap', 'dedup', 'health', 'altroot', 'autotrim', 'comment',
 ];
 
 // The zpool list row supplies the capacity columns; the status parse wins for
@@ -491,14 +490,16 @@ export async function fetchDiff(snapshot: string, target?: string): Promise<Diff
 }
 
 // ---------------------------------------------------------------------------
-// Destructive-op markers — the UI requires typed confirmation for these.
-// "receive with force" and "rename with -f" are covered by dsReceive/dsRename.
+// Destructive-op markers — informational checklist of destructive wrappers;
+// the UI's typed-confirmation gating lives in the components and is not driven
+// by this set. "receive with force" and "rename with -f" are covered by
+// dsReceive/dsRename.
 // ---------------------------------------------------------------------------
 
 export const DESTRUCTIVE_OPS: Set<string> = new Set([
     'poolDestroy', 'poolExport', 'poolLabelclear', 'poolSplit', 'poolReguid',
-    'poolCheckpoint', 'poolDdtprune', 'dsDestroy', 'dsReceive', 'dsUnloadKey',
-    'dsRename', 'dsChangeKey', 'dsRedact',
+    'poolCheckpoint', 'poolDdtprune', 'dsDestroy', 'dsRollback', 'dsReceive',
+    'dsUnloadKey', 'dsRename', 'dsChangeKey', 'dsRedact',
 ]);
 
 // ---------------------------------------------------------------------------
@@ -727,7 +728,7 @@ export const poolUpgrade = (opts: { pool?: string | string[]; all?: boolean; ver
         ...(opts.all ? ['-a'] : []), ...targetArgs(opts.pool ?? [])], 'Upgrade pool feature set');
 
 export const poolReguid = (opts: { pool: string; guid?: string }) =>
-    runZpool(['reguid', ...kv({ g: opts.guid }), opts.pool], `Regenerate GUID for pool ${opts.pool}`);
+    runZpool(['reguid', ...(opts.guid ? ['-g', opts.guid] : []), opts.pool], `Regenerate GUID for pool ${opts.pool}`);
 
 export const poolHistory = (opts: { pool?: string | string[]; internal?: boolean; long?: boolean } = {}) =>
     runZpool(['history', ...(opts.internal ? ['-i'] : []), ...(opts.long ? ['-l'] : []), ...targetArgs(opts.pool ?? [])],
@@ -984,14 +985,34 @@ export const dsUnmount = (opts: { targets?: string | string[]; all?: boolean; fo
     runZfs(['unmount', ...(opts.force ? ['-f'] : []), ...(opts.unloadKeys ? ['-u'] : []),
         ...(opts.all ? ['-a'] : []), ...targetArgs(opts.targets ?? [])], 'Unmount ZFS file systems');
 
-export const dsShare = (opts: { filesystem?: string; all?: boolean; protocol?: 'nfs' | 'smb'; loadKeys?: boolean } = {}) =>
-    runZfs(['share', ...(opts.loadKeys ? ['-l'] : []), ...(opts.all ? ['-a'] : []),
-        ...(opts.protocol ? [opts.protocol] : []), ...(opts.filesystem ? [opts.filesystem] : [])],
-           'Share ZFS file systems');
+// zfs share [-l] <-a [nfs|smb] | filesystem>: the nfs|smb token is legal only
+// after -a, and -a is mutually exclusive with a filesystem operand.
+export const dsShare = (opts: { filesystem?: string; all?: boolean; protocol?: 'nfs' | 'smb'; loadKeys?: boolean } = {}) => {
+    if (opts.all && opts.filesystem)
+        throw new Error('zfs share: -a and a filesystem operand are mutually exclusive');
+    const args = ['share', ...(opts.loadKeys ? ['-l'] : [])];
+    if (opts.all) {
+        args.push('-a', ...(opts.protocol ? [opts.protocol] : []));
+    } else {
+        if (opts.protocol) throw new Error('zfs share: nfs|smb is only valid after -a');
+        if (opts.filesystem !== undefined) args.push(opts.filesystem);
+    }
+    return runZfs(args, 'Share ZFS file systems');
+};
 
-export const dsUnshare = (opts: { target?: string; all?: boolean }) =>
-    runZfs(['unshare', ...(opts.all ? ['-a'] : []), ...(opts.target ? [opts.target] : [])],
-           'Unshare ZFS file systems');
+// zfs unshare <-a [nfs|smb] | filesystem|mountpoint>: same rules as share.
+export const dsUnshare = (opts: { target?: string; all?: boolean; protocol?: 'nfs' | 'smb' } = {}) => {
+    if (opts.all && opts.target)
+        throw new Error('zfs unshare: -a and a filesystem/mountpoint operand are mutually exclusive');
+    const args = ['unshare'];
+    if (opts.all) {
+        args.push('-a', ...(opts.protocol ? [opts.protocol] : []));
+    } else {
+        if (opts.protocol) throw new Error('zfs unshare: nfs|smb is only valid after -a');
+        if (opts.target !== undefined) args.push(opts.target);
+    }
+    return runZfs(args, 'Unshare ZFS file systems');
+};
 
 export const dsSend = (opts: {
     snapshot: string; incremental?: string; intermediates?: string; replicate?: boolean;

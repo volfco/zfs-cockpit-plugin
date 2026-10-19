@@ -14,7 +14,7 @@ default: build
 build:
     npm run build
 
-# Full local gate: typecheck, lint, parser + wrapper self-checks, build
+# Full local gate: typecheck, lint, parser + wrapper + argv self-checks, build
 check:
     #!/usr/bin/env bash
     set -uo pipefail
@@ -28,6 +28,8 @@ check:
     npm run eslint
     node test/parser-check.mjs
     node test/wrapper-check.mjs
+    # argv-check exercises the real src/service.ts wrapper argv builders
+    node test/argv-check.mjs
     npm run build
 
 # Mocked UI check against headless Firefox BiDi (starts Firefox when needed)

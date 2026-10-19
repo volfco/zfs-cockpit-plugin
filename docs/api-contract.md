@@ -22,7 +22,9 @@ plus `getCommandLog()`, `clearCommandLog()`, `setLogDiscovery(on)`, `isLogDiscov
 
 ## Runners & raw console
 
-`runZfs(args, reason?)`, `runZpool(args, reason?)`, `runCommandLine(cmdline)` (raw
+`runZfs(args, reason?)`, `runZpool(args, reason?)`, `runShell(command, reason?)`
+(logged `sh -c` runner for composed send/receive pipelines and file redirects —
+decisions.md D8/D9), `runCommandLine(cmdline)` (raw
 console entry: tokenizes like hpssa, strips optional leading `zfs `/`zpool `, dispatches),
 `tokenize(cmdline)`.
 
@@ -78,7 +80,8 @@ optional stream/progress hook (`spawnStream` returning cockpit promise with
 
 ## Destructive-op markers
 
-`export const DESTRUCTIVE_OPS: Set<string>` — wrapper names requiring typed
-confirmation in the UI (destroy, export, labelclear, split, reguid, checkpoint
-discard, receive with force, unload-key, rename with `-f`, change-key, redact,
-ddtprune).
+`export const DESTRUCTIVE_OPS: Set<string>` — informational checklist of
+destructive wrapper names (incl. destroy, export, labelclear, split, reguid,
+checkpoint discard, receive with force, unload-key, rename with `-f`, change-key,
+redact, ddtprune, rollback). It does NOT drive UI gating: typed-confirmation is
+decided per action in `src/components/actions.tsx` / `datasetActions.tsx`.

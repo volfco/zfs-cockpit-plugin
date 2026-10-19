@@ -97,6 +97,7 @@ function SpacePanel({ name, reloadKey }: { name: string; reloadKey: number }) {
     const [error, setError] = React.useState<string | null>(null);
 
     React.useEffect(() => {
+        setError(null);
         svc.fetchSpace(name)
                 .then(setRows)
                 .catch((e: unknown) => setError(e instanceof Error ? e.message : String(e)));
@@ -121,6 +122,7 @@ function HoldsPanel({ name, reloadKey }: { name: string; reloadKey: number }) {
     const [error, setError] = React.useState<string | null>(null);
 
     React.useEffect(() => {
+        setError(null);
         svc.fetchHolds(name)
                 .then(setRows)
                 .catch((e: unknown) => setError(e instanceof Error ? e.message : String(e)));
@@ -146,6 +148,7 @@ function DiffPanel({ ds, datasets, reloadKey }: { ds: Dataset; datasets: Dataset
 
     React.useEffect(() => {
         if (!snap) return;
+        setError(null);
         svc.fetchDiff(snap)
                 .then(setRows)
                 .catch((e: unknown) => setError(e instanceof Error ? e.message : String(e)));
@@ -193,6 +196,7 @@ function UsagePanel({ name, reloadKey }: { name: string; reloadKey: number }) {
     const [error, setError] = React.useState<string | null>(null);
 
     React.useEffect(() => {
+        setError(null);
         svc.fetchUsage(kind, name)
                 .then(setRows)
                 .catch((e: unknown) => setError(e instanceof Error ? e.message : String(e)));

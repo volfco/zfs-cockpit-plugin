@@ -23,6 +23,13 @@ for (const span of section.match(/`[^`]+`/g) ?? []) {
 const missing = [...names].filter(name =>
     !new RegExp(`export (?:function ${name}\\b|const ${name}\\s*=)`).test(service));
 
+// A parsed-empty set would pass vacuously; the contract section or the parsing
+// above drifted, which must fail loudly instead.
+if (names.size === 0) {
+    console.error('wrapper-check: parsed 0 required names from docs/api-contract.md — refusing a vacuous pass');
+    process.exit(1);
+}
+
 const covered = names.size - missing.length;
 console.log(`wrapper-check: ${covered}/${names.size} required wrappers exported by src/service.ts`);
 if (missing.length > 0) {

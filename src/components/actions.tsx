@@ -103,7 +103,7 @@ interface FormDialogDef {
     fields: FieldDef[];
     submitLabel?: string;
     submitVariant?: 'primary' | 'danger' | 'warning';
-    requireTyped?: string;
+    requireTyped?: string | ((values: FormValues) => string | undefined);
     onSubmit: (values: FormValues) => Promise<string>;
 }
 
@@ -950,7 +950,7 @@ export function vdevActions(pool: Pool, node: Vdev, open: OpenDialogs): ActionIt
             id: 'copy-name',
             group: _("Inspect"),
             label: _("Copy device name"),
-            onSelect: () => { navigator.clipboard?.writeText(device) },
+            onSelect: () => { navigator.clipboard?.writeText(device)?.catch(() => undefined) },
         },
     ];
 }

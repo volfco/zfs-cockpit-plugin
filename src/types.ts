@@ -5,7 +5,7 @@ export interface KeyValue {
 // --- zpool status tree ------------------------------------------------------
 
 export type VdevType =
-    'root' | 'mirror' | 'raidz' | 'raidz1' | 'raidz2' | 'raidz3' |
+    'root' | 'mirror' | 'raidz' | 'raidz1' | 'raidz2' | 'raidz3' | 'draid' |
     'disk' | 'file' | 'spare' | 'replacing' | 'log' | 'cache' |
     'hole' | 'indirect' | 'special' | 'dedup';
 
@@ -145,6 +145,8 @@ export interface DiffEntry {
     change: string;
     path: string;
     newPath?: string | undefined;
+    // File-type column ("/", "F", …) from `zfs diff -F`; plain output omits it.
+    fileType?: string | undefined;
     timestamp?: string | undefined;
 }
 

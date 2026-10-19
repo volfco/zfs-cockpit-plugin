@@ -133,31 +133,42 @@ export function parseZfsSendDryRun(output: string): SendInfo {
 }
 
 // ---------------------------------------------------------------------------
-// `zfs diff`: "<M|+|-|R|T>[type]<tab>path[<tab>newPath]" with an optional
-// leading timestamp column (-t). "-F" file-type chars are accepted and folded
-// into the change column.
+// `zfs diff` tab rows. Plain: change<TAB>path[<TAB>newPath]. With -t
+// (what service.ts runs): epoch<TAB>change<TAB>path; with -F the file type is
+// its own column: epoch<TAB>change<TAB>type<TAB>path[<TAB>newPath]. Timestamps
+// are kept verbatim (epoch seconds.nanos per platform; see
+// test/fixtures/raw/zfs-diff.txt).
 // ---------------------------------------------------------------------------
 
 export function parseZfsDiff(output: string): DiffEntry[] {
     const entries: DiffEntry[] = [];
     for (const raw of output.split('\n')) {
-        const line = raw.trim();
-        if (!line) continue;
-        const fields = (raw.includes('\t') ? raw.split('\t') : line.split(/\s{2,}/)).map(f => f.trim());
+        if (!raw.trim()) continue;
+        const fields = raw.split('\t');
         let timestamp: string | undefined;
-        if (/^\d{4}-\d{2}-\d{2}/.test(fields[0])) timestamp = fields.shift();
-        if (fields.length >= 3 && /^[BFDCPS@U=|>-]$/.test(fields[1])) fields.splice(1, 1);
-
-        const change = fields[0] ?? '';
-        if (!/^[M+\-RT]([BFDCPS@U=|>-])?$/.test(change)) continue;
-        let path = fields[1] ?? '';
-        let newPath: string | undefined = fields[2];
+        let fileType: string | undefined;
+        let change: string;
+        let path: string;
+        let newPath: string | undefined;
+        if (fields.length >= 4) {
+            // -t with -F: epoch, change, file type, path [newPath]
+            [timestamp, change, fileType, path] = fields;
+            newPath = fields[4];
+        } else if (fields.length === 3 && /^\d+(\.\d+)?$/.test(fields[0])) {
+            // -t without -F: epoch, change, path
+            [timestamp, change, path] = fields;
+        } else {
+            // plain: change, path [newPath]
+            [change, path, newPath] = fields;
+        }
+        if (!/^[M+\-RT]([BFDCPS@U=|>-])?$/.test(change ?? '')) continue;
+        path = path ?? '';
         const arrow = path.split(' -> ');
         if (arrow.length === 2) {
             path = arrow[0];
             newPath = arrow[1];
         }
-        entries.push({ change, path, newPath, timestamp });
+        entries.push({ change, path, newPath, fileType, timestamp });
     }
     return entries;
 }

@@ -15,7 +15,7 @@ import { Stack, StackItem } from "@patternfly/react-core/dist/esm/layouts/Stack/
 import cockpit from 'cockpit';
 
 import { useDialogs, type ActionItem } from './actions';
-import { parseKeyValues, splitList, type FieldDef } from './dialogs';
+import { parseKeyValues, splitList, type FieldDef, type FormValues } from './dialogs';
 import { readSettings } from './settingsPage';
 import * as svc from '../service';
 import type { Dataset, SendInfo } from '../types';
@@ -52,9 +52,11 @@ export function shellQuote(s: string): string {
     return "'" + s.replace(/'/g, "'\\''") + "'";
 }
 
-// Render argv as a copy-pasteable command; flags stay bare, operands quoted.
+// Render argv as a copy-pasteable command. Every word is single-quoted so
+// user-controlled fields (redact bookmark, -o/-x lists) cannot inject shell
+// through `sh -c` (D8): a quoted '-F' still arrives as -F in argv.
 function cmdWords(words: string[]): string {
-    return words.map(w => (w.startsWith('-') ? w : shellQuote(w))).join(' ');
+    return words.map(shellQuote).join(' ');
 }
 
 // ---------------------------------------------------------------------------
@@ -176,7 +178,6 @@ interface SendForm {
     compressed: boolean;
     props: boolean;
     raw: boolean;
-    saved: boolean;
     redact: string;
     mode: 'dry' | 'pipe' | 'file';
     target: string;
@@ -198,7 +199,6 @@ function SendDialog({ def, onClose, onSuccess }: { def: SendDef; onClose: () => 
         compressed: false,
         props: false,
         raw: false,
-        saved: false,
         redact: '',
         mode: 'dry',
         target: '',
@@ -222,7 +222,6 @@ function SendDialog({ def, onClose, onSuccess }: { def: SendDef; onClose: () => 
         if (f.compressed) args.push('-c');
         if (f.raw) args.push('-w');
         if (f.props) args.push('-p');
-        if (f.saved) args.push('--saved');
         if (f.redact.trim()) args.push('--redact', f.redact.trim());
         if (f.source) args.push(f.source);
         return args;
@@ -389,14 +388,6 @@ function SendDialog({ def, onClose, onSuccess }: { def: SendDef; onClose: () => 
                                         isChecked={f.raw}
                                         onChange={(_e, v) => set({ raw: v })}
                                         label={_("Raw encrypted stream (-w)")}
-                                    />
-                                </StackItem>
-                                <StackItem>
-                                    <Switch
-                                        id="zfs-send-saved"
-                                        isChecked={f.saved}
-                                        onChange={(_e, v) => set({ saved: v })}
-                                        label={_("Saved send stream (--saved)")}
                                     />
                                 </StackItem>
                                 <StackItem>
@@ -1333,6 +1324,12 @@ export function datasetActions(ds: Dataset, datasets: Dataset[], open: OpenDsDia
                 label: _("Unmount…"),
                 onSelect: () => open.openForm({
                     title: cockpit.format(_("Unmount $0"), name),
+                    // zfs unmount -u also unloads encryption keys: give it the
+                    // same typed-name gate as unload-key (D6).
+                    ...defined({
+                        requireTyped: (values: FormValues) =>
+                            (values.unloadKeys ? typedName(name) : undefined),
+                    }),
                     fields: [
                         { key: 'force', label: _("Force (-f)"), type: 'switch' },
                         { key: 'unloadKeys', label: _("Unload encryption keys (-u)"), type: 'switch' },
@@ -1351,23 +1348,27 @@ export function datasetActions(ds: Dataset, datasets: Dataset[], open: OpenDsDia
                 onSelect: () => open.openForm({
                     title: cockpit.format(_("Share $0"), name),
                     fields: [
+                        { key: 'all', label: _("Share all filesystems (-a)"), type: 'switch' },
                         {
                             key: 'protocol',
                             label: _("Protocol"),
                             type: 'select',
+                            // zfs share [-l] <-a [nfs|smb] | filesystem>: the
+                            // protocol token is legal only after -a.
+                            visible: values => Boolean(values.all),
                             options: [
                                 { value: 'nfs', label: 'NFS' },
                                 { value: 'smb', label: 'SMB' },
                             ],
-                            helper: _("Leave empty to share with the protocol of the sharenfs/sharesmb properties."),
+                            helper: _("Only with -a: share via one protocol. Leave empty to use the sharenfs/sharesmb properties."),
                         },
-                        { key: 'all', label: _("Share all filesystems (-a)"), type: 'switch' },
                     ],
-                    onSubmit: v => svc.dsShare({
-                        filesystem: name,
-                        all: Boolean(v.all),
-                        ...defined({ protocol: String(v.protocol ?? '') || undefined }),
-                    }),
+                    onSubmit: v => svc.dsShare(v.all
+                        ? {
+                            all: true,
+                            ...defined({ protocol: String(v.protocol ?? '') || undefined }),
+                        }
+                        : { filesystem: name }),
                 }),
             },
             {
@@ -1641,13 +1642,9 @@ export function datasetActions(ds: Dataset, datasets: Dataset[], open: OpenDsDia
                         key: 'activity',
                         label: _("Activity (-t)"),
                         type: 'select',
+                        // help/zfs-wait.txt documents exactly one activity.
                         options: [
                             { value: 'deleteq', label: _("Delete queue (deleteq)") },
-                            { value: 'free', label: _("Free") },
-                            { value: 'readonly', label: _("Read-only") },
-                            { value: 'quiesce', label: _("Quiesce") },
-                            { value: 'sync', label: _("Sync") },
-                            { value: 'delete', label: _("Delete") },
                         ],
                         helper: _("Leave empty to wait for every activity type."),
                     }],

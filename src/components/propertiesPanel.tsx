@@ -97,10 +97,8 @@ export function PropertiesPanel({ target, reloadKey, onChanged }: {
     const inherit = (property: string, revert: boolean) => {
         setError(null);
         svc.dsInherit({ property, targets: target, revert })
-                .then(() => {
-                    load();
-                    onChanged();
-                })
+                // onChanged bumps reloadKey, whose effect refetches via load().
+                .then(() => onChanged())
                 .catch((e: unknown) => setError(e instanceof Error ? e.message : String(e)));
     };
 
