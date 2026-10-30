@@ -4,13 +4,13 @@
 // UI check renders). This module is loaded by the ui-check esbuild bundle,
 // not Node — imports mirror the src/ style (extensionless).
 import type {
-    CommandLogEntry, Dataset, DatasetProperty, DiffEntry, EventEntry, HistoryEntry,
+    BlockDevice, CommandLogEntry, Dataset, DatasetProperty, DiffEntry, EventEntry, HistoryEntry,
     HoldEntry, ImportablePool, Pool, PoolIostat, PoolProperty, SendInfo, SpaceEntry,
     SystemOverview, UsageEntry, ZfsVersion,
 } from '../../src/types';
 import {
     parseZpoolStatus, parseZpoolList, parseZpoolGet, parseZpoolHistory,
-    parseZpoolEvents, parseZpoolImport,
+    parseZpoolEvents, parseZpoolImport, parseAvailableDisks,
 } from '../../src/zpool';
 import {
     parseZfsList, parseZfsGet, parseZfsSpace, parseZfsHolds, parseZfsSendDryRun,
@@ -48,6 +48,24 @@ config:
 
 errors: No known data errors
 `;
+
+// `lsblk -J -b -p -o NAME,SIZE,MODEL,ROTA,TYPE,FSTYPE` (synthetic capture in
+// the real output shape): sda/sdb/nvme0n1 free, sdc is a whole-disk pool member
+// (zfs_member partition), sdd holds a non-ZFS filesystem (still offered).
+const LSBLK_TEXT = JSON.stringify({
+    blockdevices: [
+        { name: '/dev/sda', size: 1000204886016, model: 'ST1000DM003-1ER162', rota: true, type: 'disk', fstype: null },
+        { name: '/dev/sdb', size: 1000204886016, model: 'ST1000DM003-1ER162', rota: true, type: 'disk', fstype: null },
+        {
+            name: '/dev/sdc', size: 512110190592, model: 'Samsung SSD 850', rota: false, type: 'disk', fstype: null,
+            children: [
+                { name: '/dev/sdc1', size: 512109142016, model: null, rota: false, type: 'part', fstype: 'zfs_member' },
+            ],
+        },
+        { name: '/dev/sdd', size: 250059350016, model: 'WDC WD2500AAKS-00L7A0', rota: true, type: 'disk', fstype: 'ext4' },
+        { name: '/dev/nvme0n1', size: 256060514304, model: 'Samsung SSD 970 EVO Plus 250GB', rota: false, type: 'disk', fstype: null },
+    ],
+});
 
 // `zpool list -H -o name,size,alloc,free,checkpoint,expandsz,fragmentation,cap,dedup,health,altroot`
 const LIST_TEXT = `scratch	1.88G	976K	1.87G	-	-	4%	0%	1.00	ONLINE	-
@@ -355,6 +373,13 @@ const cockpitStub = {
     gettext: (s: string) => s,
     format: (s: string, ...args: string[]) =>
         s.replace(/\$(\d+)/g, (_match, i) => args[Number(i)] ?? ''),
+    format_bytes: (n: number) => {
+        const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+        let v = n;
+        let u = 0;
+        while (v >= 1024 && u < units.length - 1) { v /= 1024; u++ }
+        return `${u === 0 ? v : v.toFixed(1)} ${units[u]}`;
+    },
     spawn: (args: string[]): Promise<string> => {
         win.__calls.push(args);
         return new Promise<string>((resolve, reject) => {
@@ -588,6 +613,12 @@ export async function fetchPoolEvents(_opts: { pool?: string; verbose?: boolean 
 export async function fetchImportablePools(_searchDir?: string): Promise<ImportablePool[]> {
     await run('zpool', ['import'], { reason: 'Search for importable pools', discovery: true });
     return importable;
+}
+
+export async function fetchAvailableDisks(): Promise<BlockDevice[]> {
+    await run('sh', ['-c', 'lsblk -J -b -p -o NAME,SIZE,MODEL,ROTA,TYPE,FSTYPE'],
+              { reason: 'List disks available for pool creation', discovery: true });
+    return parseAvailableDisks(LSBLK_TEXT);
 }
 
 export async function fetchDatasetList(_opts: { types?: string | string[]; root?: string; depth?: number } = {}): Promise<Dataset[]> {

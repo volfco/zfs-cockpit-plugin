@@ -1,14 +1,14 @@
 import cockpit from 'cockpit';
 import {
     parseZpoolStatus, parseZpoolImport, parseZpoolList, parseZpoolIostat,
-    parseZpoolGet, parseZpoolHistory, parseZpoolEvents
+    parseZpoolGet, parseZpoolHistory, parseZpoolEvents, parseAvailableDisks
 } from './zpool';
 import {
     parseZfsList, parseZfsGet, parseZfsSpace, parseZfsHolds,
     parseZfsSendDryRun, parseZfsDiff
 } from './zfs';
 import type {
-    CommandLogEntry, Dataset, DatasetProperty, DiffEntry, EventEntry, HistoryEntry,
+    BlockDevice, CommandLogEntry, Dataset, DatasetProperty, DiffEntry, EventEntry, HistoryEntry,
     HoldEntry, ImportablePool, Pool, PoolIostat, PoolProperty, SendInfo, SpaceEntry,
     SystemOverview, UsageEntry, ZfsVersion
 } from './types';
@@ -400,6 +400,14 @@ export async function fetchImportablePools(searchDir?: string): Promise<Importab
     }
     if (/no pools available/i.test(output)) return [];
     return parseZpoolImport(output);
+}
+
+// Disks offered when creating a pool (decisions.md D15): everything lsblk
+// reports except devices that already belong to a pool (zfs_member label).
+export async function fetchAvailableDisks(): Promise<BlockDevice[]> {
+    const output = await runShell('lsblk -J -b -p -o NAME,SIZE,MODEL,ROTA,TYPE,FSTYPE',
+                                  { reason: 'List disks available for pool creation', discovery: true });
+    return parseAvailableDisks(output);
 }
 
 export async function fetchDatasetList(opts: { types?: string | string[]; root?: string; depth?: number } = {}): Promise<Dataset[]> {

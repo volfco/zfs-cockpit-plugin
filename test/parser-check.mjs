@@ -6,7 +6,7 @@ import { readFileSync } from 'node:fs';
 import {
     parseZpoolStatus, parseZpoolList, parseZpoolIostat, parseZpoolGet,
     parseZpoolHistory, parseZpoolEvents, parseZpoolImport, parsePoolScan,
-    vdevType,
+    parseAvailableDisks, vdevType,
 } from '../src/zpool.ts';
 import {
     parseZfsList, parseZfsGet, parseZfsSpace, parseZfsHolds,
@@ -264,6 +264,32 @@ function sections(text) {
         && replacing.children[1].name === '/tmp/zfs-fixtures/disk10.img',
     'replacing: replacing-1 with two children nested in raidz1-0');
     check(vdevType('draid2-0') === 'draid', 'vdevType: draid');
+}
+
+// --- lsblk: disks offered when creating a pool ------------------------------
+// synthetic: output shape captured live (`lsblk -J -b -p -o NAME,SIZE,MODEL,
+// ROTA,TYPE,FSTYPE`), devices edited to cover the pool-member cases.
+{
+    const disks = parseAvailableDisks(raw('lsblk.txt'));
+    const paths = disks.map(d => d.path);
+    check(paths.includes('/dev/sda'), 'lsblk: free disk listed');
+    check(paths.includes('/dev/sdb') && paths.includes('/dev/sdb1'),
+        'lsblk: disk with unformatted partition lists both');
+    check(paths.includes('/dev/sdd') && paths.includes('/dev/nvme0n1p1'),
+        'lsblk: non-pool devices with other filesystems stay selectable');
+    check(paths.includes('/dev/nvme1n1'), 'lsblk: model-less device listed');
+    check(!paths.some(p => p === '/dev/sdc' || p === '/dev/sdc1'),
+        'lsblk: zfs_member partition excludes itself and its whole disk');
+    check(!paths.some(p => p === '/dev/nvme0n1' || p === '/dev/nvme0n1p2'),
+        'lsblk: whole disk with zfs_member partition excluded');
+    check(!paths.includes('/dev/loop0'), 'lsblk: loop devices not offered');
+    const sda = disks.find(d => d.path === '/dev/sda');
+    check(!!sda && sda.size === 1000204886016 && sda.rotational === true
+        && sda.model === 'ST1000DM003-1ER162' && sda.type === 'disk',
+    'lsblk: size/rota/model/type parsed');
+    const sdb1 = disks.find(d => d.path === '/dev/sdb1');
+    check(!!sdb1 && sdb1.rotational === true && sdb1.model === '' && sdb1.type === 'part',
+        'lsblk: partition row parsed with empty model');
 }
 
 if (failures) {

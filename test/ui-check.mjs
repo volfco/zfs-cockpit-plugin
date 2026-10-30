@@ -26,7 +26,7 @@ const implemented = new Set([
     'getVersion', 'hasCapability', 'refreshVersion', 'CAPABILITY_LIST',
     'DESTRUCTIVE_OPS', 'fetchOverview', 'fetchPoolStatus', 'fetchIostat',
     'fetchPoolProperties', 'fetchVdevProperties', 'fetchPoolHistory',
-    'fetchPoolEvents', 'fetchImportablePools', 'fetchDatasetList',
+    'fetchPoolEvents', 'fetchImportablePools', 'fetchAvailableDisks', 'fetchDatasetList',
     'fetchDatasetProperties', 'fetchSpace', 'fetchHolds', 'fetchUsage',
     'sendDryRun', 'fetchDiff',
 ]);
@@ -200,6 +200,45 @@ try {
     for (const t of ['Attach', 'Detach', 'Replace'])
         assert(await has('.pf-v6-c-menu__item', t), `vdev menu entry ${t}`);
     await click('button[aria-label="Actions for raidz1-0"]', '');
+
+    // 2b. Create pool dialog: device multi-selects offer only unassigned disks.
+    console.log('CASE create pool dialog');
+    await click('button', 'Create pool');
+    await waitForEval(`!!document.querySelector('[role=dialog]')`, 'create pool dialog');
+    assert(await has('[role=dialog]', 'Member devices'), 'member devices field');
+    const membersToggle = 'button[id$="-members"]';
+    await click(membersToggle, '');
+    assert(await has('.pf-v6-c-menu__item', '/dev/sda'), 'free disk offered');
+    assert(await has('.pf-v6-c-menu__item', '/dev/nvme0n1'), 'free SSD offered');
+    assert(await has('.pf-v6-c-menu__item', '/dev/sdd'), 'non-pool disk with other fs offered (D15)');
+    assert.equal(await has('.pf-v6-c-menu__item', '/dev/sdc'), false, 'pool member disk not offered');
+    assert.equal(await has('.pf-v6-c-menu__item', '/dev/sdc1'), false, 'pool member partition not offered');
+    await click(membersToggle, ''); // close the members menu
+    // Each field gets its own open → select → close cycle so a still-open
+    // menu can never swallow another field's click.
+    const selectDevice = async (suffix, dev) => {
+        const toggle = `button[id$="-${suffix}"]`;
+        await click(toggle, '');
+        await click('.pf-v6-c-menu__item', dev);
+        await click(toggle, '');
+    };
+    await selectDevice('members', '/dev/sda');
+    await selectDevice('members', '/dev/sdb');
+    await selectDevice('cacheDevices', '/dev/sdd');
+    await selectDevice('spareDevices', '/dev/nvme0n1');
+    assert(await has('[role=dialog] .pf-v6-c-label', '/dev/sda', true), 'sda chip shown');
+    assert(await has('[role=dialog] .pf-v6-c-label', '/dev/sdb', true), 'sdb chip shown');
+    assert(await evaluate(`['-logDevices', '-cacheDevices', '-spareDevices'].every(s => document.querySelector('button[id$="' + s + '"]'))`),
+        'log/cache/spares get the same multi-select');
+    await setValue('[role=dialog] input[type="text"]', 'tank');
+    await settle();
+    await click('.pf-v6-c-modal-box button', 'Create pool', true);
+    await waitForEval(`document.querySelector('[role=dialog]').innerText.includes('Command completed')`, 'create pool result');
+    assert(await evaluate(`window.__calls.some(c => c[0] === 'zpool' && c[1] === 'create' && c.join(' ').includes('/dev/sda,/dev/sdb,cache,/dev/sdd,spare,/dev/nvme0n1'))`),
+        'zpool create argv: members + cache/spare keywords from the selections');
+    await click('.pf-v6-c-modal-box button', 'Close', true);
+    await waitForEval(`!document.querySelector('[role=dialog]')`, 'create pool dialog closes');
+    await checkLayout('create pool 1440');
 
     // 3. Datasets tab: all four dataset types, properties, space, holds.
     console.log('CASE datasets');

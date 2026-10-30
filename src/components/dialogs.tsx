@@ -4,6 +4,9 @@ import { Form, FormGroup, FormHelperText } from "@patternfly/react-core/dist/esm
 import { TextInput } from "@patternfly/react-core/dist/esm/components/TextInput/index.js";
 import { TextArea } from "@patternfly/react-core/dist/esm/components/TextArea/index.js";
 import { FormSelect, FormSelectOption } from "@patternfly/react-core/dist/esm/components/FormSelect/index.js";
+import { Select, SelectList, SelectOption } from "@patternfly/react-core/dist/esm/components/Select/index.js";
+import { MenuToggle } from "@patternfly/react-core/dist/esm/components/MenuToggle/index.js";
+import { Label } from "@patternfly/react-core/dist/esm/components/Label/index.js";
 import { Switch } from "@patternfly/react-core/dist/esm/components/Switch/index.js";
 import { Button } from "@patternfly/react-core/dist/esm/components/Button/index.js";
 import { Alert } from "@patternfly/react-core/dist/esm/components/Alert/index.js";
@@ -16,7 +19,7 @@ import { Stack, StackItem } from "@patternfly/react-core/dist/esm/layouts/Stack/
 import cockpit from 'cockpit';
 
 import * as svc from '../service';
-import type { ImportablePool, Vdev } from '../types';
+import type { BlockDevice, ImportablePool, Vdev } from '../types';
 import { readSettings } from './settingsPage';
 
 const _ = cockpit.gettext;
@@ -57,7 +60,7 @@ export function parseKeyValues(text: string): Record<string, string> {
 // Field model
 // ---------------------------------------------------------------------------
 
-type FieldType = 'text' | 'number' | 'select' | 'switch' | 'textarea' | 'password';
+type FieldType = 'text' | 'number' | 'select' | 'switch' | 'textarea' | 'password' | 'multiselect';
 
 export interface FieldDef {
     key: string;
@@ -71,7 +74,7 @@ export interface FieldDef {
     visible?: (values: Record<string, unknown>) => boolean;
 }
 
-export type FormValues = Record<string, string | number | boolean | undefined>;
+export type FormValues = Record<string, string | number | boolean | string[] | undefined>;
 
 // ---------------------------------------------------------------------------
 // Generic form-driven action dialog. Renders fields, handles submit + spinner
@@ -105,8 +108,12 @@ export function FormDialog({
     const [result, setResult] = React.useState<string | null>(null);
     const [typed, setTyped] = React.useState('');
 
+    // Re-initialize only when the dialog opens: fields can gain async-loaded
+    // options (e.g. the disk lists in the create-pool dialog) while open, and
+    // that must not wipe what the user already typed.
+    const wasOpen = React.useRef(false);
     React.useEffect(() => {
-        if (isOpen) {
+        if (isOpen && !wasOpen.current) {
             const init: FormValues = {};
             for (const f of fields) {
                 if (f.defaultValue !== undefined) init[f.key] = f.defaultValue as FormValues[string];
@@ -117,6 +124,7 @@ export function FormDialog({
             setBusy(false);
             setTyped('');
         }
+        wasOpen.current = isOpen;
     }, [isOpen, fields]);
 
     const set = (key: string, value: FormValues[string]) =>
@@ -140,7 +148,10 @@ export function FormDialog({
 
     const missingRequired = fields
             .filter(isVisible)
-            .some(f => f.required && (values[f.key] === undefined || values[f.key] === ''));
+            .some(f => {
+                const v = values[f.key];
+                return f.required && (Array.isArray(v) ? v.length === 0 : v === undefined || v === '');
+            });
 
     const requireTypedName = typeof requireTyped === 'function' ? requireTyped(values) : requireTyped;
     const typedOk = !requireTypedName || typed === requireTypedName;
@@ -287,7 +298,78 @@ function renderField(f: FieldDef, value: FormValues[string], set: (v: FormValues
                 label={_("Enabled")}
             />
         );
+    case 'multiselect':
+        return (
+            <MultiSelectField
+                id={id}
+                options={f.options ?? []}
+                value={(value as string[] | undefined) ?? []}
+                set={set}
+                {...accessibility}
+            />
+        );
     }
+}
+
+// Checkbox dropdown for picking several devices: PF6 Select with checkbox
+// options; chosen paths are shown as removable chips under the toggle.
+function MultiSelectField({ id, options, value, set, ...toggleProps }: {
+    id: string;
+    options: { value: string; label: string }[];
+    value: string[];
+    set: (v: string[]) => void;
+}) {
+    const [open, setOpen] = React.useState(false);
+    const toggleValue = (v: string) =>
+        set(value.includes(v) ? value.filter(x => x !== v) : [...value, v]);
+    return (
+        <div>
+            <Select
+                isOpen={open}
+                onOpenChange={setOpen}
+                selected={value}
+                role="menu"
+                onSelect={(_e, v) => { if (typeof v === 'string') toggleValue(v); }}
+                toggle={toggleRef => (
+                    <MenuToggle
+                        id={id}
+                        ref={toggleRef}
+                        isExpanded={open}
+                        isFullWidth
+                        isPlaceholder={value.length === 0}
+                        onClick={() => setOpen(o => !o)}
+                        {...toggleProps}
+                    >
+                        {value.length
+                            ? cockpit.format(_("$0 selected"), value.length)
+                            : (options.length ? _("Select devices…") : _("No available devices"))}
+                    </MenuToggle>
+                )}
+            >
+                <SelectList>
+                    {options.map(o => (
+                        <SelectOption key={o.value} value={o.value} hasCheckbox isSelected={value.includes(o.value)}>
+                            {o.label}
+                        </SelectOption>
+                    ))}
+                </SelectList>
+            </Select>
+            {value.length > 0 && (
+                <Flex spaceItems={{ default: 'spaceItemsXs' }} flexWrap={{ default: 'wrap' }} style={{ marginTop: 'var(--pf-v6-global--spacer--sm)' }}>
+                    {value.map(v => (
+                        <Label
+                            key={v}
+                            isCompact
+                            closeBtnAriaLabel={cockpit.format(_("Remove $0"), v)}
+                            onClose={() => set(value.filter(x => x !== v))}
+                        >
+                            {v}
+                        </Label>
+                    ))}
+                </Flex>
+            )}
+        </div>
+    );
 }
 
 // ---------------------------------------------------------------------------
@@ -543,56 +625,72 @@ export function RawCommandDialog({ isOpen, onClose, onRun }: RawCommandDialogPro
 
 // ---------------------------------------------------------------------------
 // Create pool dialog — a FormDialog-driven wrapper building `zpool create`
-// argv from the layout + member lists.
+// argv from the layout + member lists. Devices come from `lsblk` via
+// fetchAvailableDisks (pool members are already filtered out there).
 // ---------------------------------------------------------------------------
 
-const CREATE_POOL_FIELDS: FieldDef[] = [
-    { key: 'name', label: _("Pool name"), type: 'text', required: true, placeholder: 'tank' },
-    {
-        key: 'layout',
-        label: _("Vdev layout"),
-        type: 'select',
-        defaultValue: 'stripe',
-        helper: _("Stripe = each member is its own top-level vdev. draid variants are draid<parity>."),
-        options: [
-            { value: 'stripe', label: _("Stripe (no redundancy)") },
-            { value: 'mirror', label: 'mirror' },
-            { value: 'raidz1', label: 'raidz1' },
-            { value: 'raidz2', label: 'raidz2' },
-            { value: 'raidz3', label: 'raidz3' },
-            { value: 'draid1', label: 'draid1' },
-            { value: 'draid2', label: 'draid2' },
-            { value: 'draid3', label: 'draid3' },
-        ],
-    },
-    {
-        key: 'members',
-        label: _("Member devices"),
-        type: 'textarea',
-        required: true,
-        placeholder: "/dev/disk/by-id/…\n/dev/disk/by-id/…",
-        helper: _("Disks, partitions, or file vdevs — one per line or comma-separated."),
-    },
-    { key: 'logDevices', label: _("Log devices"), type: 'textarea', helper: _("Optional. Becomes the \"log\" section; use the raw console for a log mirror.") },
-    { key: 'cacheDevices', label: _("Cache devices"), type: 'textarea', helper: _("Optional. Becomes the \"cache\" section.") },
-    { key: 'spareDevices', label: _("Spares"), type: 'textarea', helper: _("Optional. Becomes the \"spares\" section.") },
-    { key: 'force', label: _("Force (-f)"), type: 'switch', helper: _("Allow devices in use or of mixed sizes.") },
-    { key: 'altroot', label: _("Alternate root (-R)"), type: 'text', placeholder: '/mnt' },
-    { key: 'mountpoint', label: _("Mount point (-m)"), type: 'text', placeholder: '/tank' },
-    {
-        key: 'properties',
-        label: _("Pool properties"),
-        type: 'textarea',
-        placeholder: "ashift=12\ncomment=production",
-        helper: _("Pool properties as key=value, one per line (zpool create -o)."),
-    },
-];
+function diskOptions(disks: BlockDevice[]): { value: string; label: string }[] {
+    return disks.map(d => ({
+        value: d.path,
+        label: `${d.path} — ${cockpit.format_bytes(d.size)} ${d.model ? d.model + ' ' : ''}(${d.rotational ? 'HDD' : 'SSD'})`,
+    }));
+}
+
+function createPoolFields(disks: BlockDevice[], diskError: string | null): FieldDef[] {
+    const options = diskOptions(disks);
+    return [
+        { key: 'name', label: _("Pool name"), type: 'text', required: true, placeholder: 'tank' },
+        {
+            key: 'layout',
+            label: _("Vdev layout"),
+            type: 'select',
+            defaultValue: 'stripe',
+            helper: _("Stripe = each member is its own top-level vdev. draid variants are draid<parity>."),
+            options: [
+                { value: 'stripe', label: _("Stripe (no redundancy)") },
+                { value: 'mirror', label: 'mirror' },
+                { value: 'raidz1', label: 'raidz1' },
+                { value: 'raidz2', label: 'raidz2' },
+                { value: 'raidz3', label: 'raidz3' },
+                { value: 'draid1', label: 'draid1' },
+                { value: 'draid2', label: 'draid2' },
+                { value: 'draid3', label: 'draid3' },
+            ],
+        },
+        {
+            key: 'members',
+            label: _("Member devices"),
+            type: 'multiselect',
+            required: true,
+            options,
+            helper: diskError
+                ? cockpit.format(_("Could not list available disks: $0"), diskError)
+                : _("Disks or partitions to use. Devices already assigned to a pool are not listed."),
+        },
+        { key: 'logDevices', label: _("Log devices"), type: 'multiselect', options, helper: _("Optional. Becomes the \"log\" section; use the raw console for a log mirror.") },
+        { key: 'cacheDevices', label: _("Cache devices"), type: 'multiselect', options, helper: _("Optional. Becomes the \"cache\" section.") },
+        { key: 'spareDevices', label: _("Spares"), type: 'multiselect', options, helper: _("Optional. Becomes the \"spares\" section.") },
+        { key: 'force', label: _("Force (-f)"), type: 'switch', helper: _("Allow devices in use or of mixed sizes.") },
+        { key: 'altroot', label: _("Alternate root (-R)"), type: 'text', placeholder: '/mnt' },
+        { key: 'mountpoint', label: _("Mount point (-m)"), type: 'text', placeholder: '/tank' },
+        {
+            key: 'properties',
+            label: _("Pool properties"),
+            type: 'textarea',
+            placeholder: "ashift=12\ncomment=production",
+            helper: _("Pool properties as key=value, one per line (zpool create -o)."),
+        },
+    ];
+}
+
+const pickDevices = (values: FormValues, key: string): string[] =>
+    (values[key] as string[] | undefined) ?? [];
 
 async function submitCreatePool(values: FormValues): Promise<string> {
-    const members = splitList(String(values.members ?? ''));
-    const logDevices = splitList(String(values.logDevices ?? ''));
-    const cacheDevices = splitList(String(values.cacheDevices ?? ''));
-    const spareDevices = splitList(String(values.spareDevices ?? ''));
+    const members = pickDevices(values, 'members');
+    const logDevices = pickDevices(values, 'logDevices');
+    const cacheDevices = pickDevices(values, 'cacheDevices');
+    const spareDevices = pickDevices(values, 'spareDevices');
     const layout = String(values.layout ?? 'stripe');
     const vdevs = [
         ...(layout === 'stripe' ? members : [layout, ...members]),
@@ -618,13 +716,31 @@ export function CreatePoolDialog({ isOpen, onClose, onSuccess }: {
     onClose: () => void;
     onSuccess: () => void;
 }) {
+    const [disks, setDisks] = React.useState<BlockDevice[]>([]);
+    const [diskError, setDiskError] = React.useState<string | null>(null);
+    React.useEffect(() => {
+        if (!isOpen) return;
+        // Drop the previous session's list: a device may have joined a pool
+        // since, and stale options must not be selectable while refetching.
+        setDisks([]);
+        setDiskError(null);
+        let alive = true;
+        svc.fetchAvailableDisks()
+                .then(found => { if (alive) setDisks(found); })
+                .catch((e: unknown) => {
+                    if (!alive) return;
+                    setDisks([]);
+                    setDiskError(e instanceof Error ? e.message : String(e));
+                });
+        return () => { alive = false };
+    }, [isOpen]);
     return (
         <FormDialog
             isOpen={isOpen}
             onClose={onClose}
             title={_("Create pool")}
-            description={_("Create a new ZFS storage pool from disks, partitions, or file vdevs.")}
-            fields={CREATE_POOL_FIELDS}
+            description={_("Create a new ZFS storage pool from available disks or partitions.")}
+            fields={createPoolFields(disks, diskError)}
             submitLabel={_("Create pool")}
             onSubmit={submitCreatePool}
             onSuccess={onSuccess}

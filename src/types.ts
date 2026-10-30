@@ -90,6 +90,16 @@ export interface PoolIostat {
     rows: VdevIostat[];
 }
 
+// --- block devices (lsblk) -------------------------------------------------
+
+export interface BlockDevice {
+    path: string;
+    size: number; // bytes, 0 when unknown
+    model: string;
+    rotational: boolean;
+    type: string; // lsblk TYPE: 'disk', 'part', …
+}
+
 // --- zfs datasets -----------------------------------------------------------
 
 export type DatasetType = 'filesystem' | 'volume' | 'snapshot' | 'bookmark';

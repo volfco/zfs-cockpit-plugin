@@ -1,6 +1,6 @@
 import type {
-    EventEntry, HistoryEntry, ImportablePool, Pool, PoolProperty, PoolScan,
-    Vdev, VdevClass, VdevIostat, VdevType
+    BlockDevice, EventEntry, HistoryEntry, ImportablePool, Pool, PoolProperty,
+    PoolScan, Vdev, VdevClass, VdevIostat, VdevType
 } from './types';
 
 // ---------------------------------------------------------------------------
@@ -20,6 +20,45 @@ const CLASS_LABELS: Record<string, { type: VdevType; class: VdevClass }> = {
     special: { type: 'special', class: 'special' },
     dedup: { type: 'dedup', class: 'dedup' },
 };
+
+// ---------------------------------------------------------------------------
+// `lsblk -J -b -p -o NAME,SIZE,MODEL,ROTA,TYPE,FSTYPE` — disks offered when
+// creating a pool. A device carrying a zfs_member label (or whose partitions
+// do) already belongs to a pool — imported or not — and is excluded.
+// ---------------------------------------------------------------------------
+
+interface LsblkNode {
+    name?: string | undefined;
+    size?: number | null | undefined;
+    model?: string | null | undefined;
+    rota?: boolean | undefined;
+    type?: string | null | undefined;
+    fstype?: string | null | undefined;
+    children?: LsblkNode[] | null | undefined;
+}
+
+function hasZfsMember(node: LsblkNode): boolean {
+    return node.fstype === 'zfs_member' || (node.children ?? []).some(hasZfsMember);
+}
+
+export function parseAvailableDisks(json: string): BlockDevice[] {
+    const nodes = (JSON.parse(json) as { blockdevices?: LsblkNode[] }).blockdevices ?? [];
+    const out: BlockDevice[] = [];
+    const walk = (node: LsblkNode) => {
+        if (node.name && (node.type === 'disk' || node.type === 'part') && !hasZfsMember(node)) {
+            out.push({
+                path: node.name,
+                size: Number(node.size ?? 0),
+                model: (node.model ?? '').trim(),
+                rotational: Boolean(node.rota),
+                type: node.type,
+            });
+        }
+        for (const child of node.children ?? []) walk(child);
+    };
+    for (const node of nodes) walk(node);
+    return out;
+}
 
 export function vdevType(name: string): VdevType {
     if (/^mirror-\d+$/.test(name)) return 'mirror';

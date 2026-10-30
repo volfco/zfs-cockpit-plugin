@@ -1,0 +1,91 @@
+{
+   "blockdevices": [
+      {
+         "name": "/dev/sda",
+         "size": 1000204886016,
+         "model": "ST1000DM003-1ER162",
+         "rota": true,
+         "type": "disk",
+         "fstype": null
+      },{
+         "name": "/dev/sdb",
+         "size": 250059350016,
+         "model": "WDC WD2500JS-60MHB0",
+         "rota": true,
+         "type": "disk",
+         "fstype": null,
+         "children": [
+            {
+               "name": "/dev/sdb1",
+               "size": 250057252352,
+               "model": null,
+               "rota": true,
+               "type": "part",
+               "fstype": null
+            }
+         ]
+      },{
+         "name": "/dev/sdc",
+         "size": 512110190592,
+         "model": "Samsung SSD 850",
+         "rota": false,
+         "type": "disk",
+         "fstype": null,
+         "children": [
+            {
+               "name": "/dev/sdc1",
+               "size": 512109142016,
+               "model": null,
+               "rota": false,
+               "type": "part",
+               "fstype": "zfs_member"
+            }
+         ]
+      },{
+         "name": "/dev/sdd",
+         "size": 250059350016,
+         "model": "WDC WD2500AAKS-00L7A0",
+         "rota": true,
+         "type": "disk",
+         "fstype": "ext4"
+      },{
+         "name": "/dev/nvme0n1",
+         "size": 256060514304,
+         "model": "Samsung SSD 970 EVO Plus 250GB",
+         "rota": false,
+         "type": "disk",
+         "fstype": null,
+         "children": [
+            {
+               "name": "/dev/nvme0n1p1",
+               "size": 536870912,
+               "model": null,
+               "rota": false,
+               "type": "part",
+               "fstype": "vfat"
+            },{
+               "name": "/dev/nvme0n1p2",
+               "size": 255519926272,
+               "model": null,
+               "rota": false,
+               "type": "part",
+               "fstype": "zfs_member"
+            }
+         ]
+      },{
+         "name": "/dev/nvme1n1",
+         "size": 5368709120,
+         "model": null,
+         "rota": false,
+         "type": "disk",
+         "fstype": null
+      },{
+         "name": "/dev/loop0",
+         "size": 104857600,
+         "model": null,
+         "rota": false,
+         "type": "loop",
+         "fstype": "ext4"
+      }
+   ]
+}

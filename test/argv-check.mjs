@@ -19,7 +19,8 @@ export default {
     gettext: s => s,
     spawn(argv, _opts) {
         calls.push(argv);
-        const proc = Promise.resolve('');
+        // lsblk output feeds JSON.parse in fetchAvailableDisks; answer valid JSON.
+        const proc = Promise.resolve(argv.some(a => a.includes('lsblk')) ? '{"blockdevices":[]}' : '');
         proc.stream = () => proc;
         return proc;
     },
@@ -218,16 +219,20 @@ const cases = [
          '-s', 'name', '-S', 'used', '-t', 'user', 'fs']],
     ['runShell echo', () => svc.runShell('echo hi', 'test'),
         ['sh', '-c', 'echo hi']],
+
+    // --- fetchers ---
+    ['fetchAvailableDisks', () => svc.fetchAvailableDisks(),
+        ['sh', '-c', 'lsblk -J -b -p -o NAME,SIZE,MODEL,ROTA,TYPE,FSTYPE']],
 ];
 
 let pass = 0;
 let fail = 0;
 for (const [name, call, argv, throws] of cases) {
-    let threw = false;
+    let threw = null;
     try {
         await call();
-    } catch {
-        threw = true;
+    } catch (e) {
+        threw = e;
     }
     const got = takeCalls();
     if (throws) {
@@ -240,7 +245,7 @@ for (const [name, call, argv, throws] of cases) {
     }
     if (threw) {
         fail++;
-        console.error(`FAIL ${name}: wrapper threw unexpectedly`);
+        console.error(`FAIL ${name}: wrapper threw unexpectedly: ${threw}`);
         continue;
     }
     // Every wrapper above runs exactly one cockpit.spawn; argv is what it gets.
