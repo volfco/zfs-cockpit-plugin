@@ -41,10 +41,19 @@ function isReadonly(p: DatasetProperty): boolean {
     return p.source === '-' || p.source === '—' || READONLY_PROPS.has(p.name);
 }
 
-// Value editors: boolean-ish properties get an on/off select, everything else
-// plain text (numeric/size properties carry a suffix hint).
+// Properties that can ONLY ever be on/off. Judging from the current value
+// would wrongly force enum properties like compression (on|off|lz4|zstd|…)
+// into an on/off dropdown whenever they happen to be 'on'.
+// shortcut: hand-maintained; new pure-boolean properties must be added here.
+const BOOLEAN_PROPS = new Set([
+    'atime', 'devices', 'exec', 'nbmand', 'overlay', 'readonly', 'setuid',
+    'sharesmb', 'zoned',
+]);
+
+// Value editors: pure-boolean properties get an on/off select, everything
+// else plain text (numeric/size properties carry a suffix hint).
 function valueField(p: DatasetProperty): FieldDef {
-    if (p.value === 'on' || p.value === 'off') {
+    if (BOOLEAN_PROPS.has(p.name)) {
         return {
             key: 'value',
             label: _("Value"),
