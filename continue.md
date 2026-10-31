@@ -13,12 +13,15 @@ decisions.md; deferred work lives in todo.md.
 
 ## Current state
 
-- All local gates green (`just check`, `just ui-check`); the create-pool device
-  multi-select (decisions.md D15) is committed and released as tag `v0.1.2`
-  (`just tag <version>` tags and pushes; packages derive version `0.1.2` from it).
+- All local gates green (`just check`, `just ui-check`); latest release is tag
+  `v0.1.3` (D17: property-edit modal uses a `BOOLEAN_PROPS` set instead of
+  value-based detection, so enum props like compression accept zstd/lz4).
+  `just tag <version>` tags and pushes; packages derive the version from the tag.
 
 ## Next up
 
+- [ ] `BOOLEAN_PROPS` in propertiesPanel.tsx is hand-maintained — verify it
+      against a live `zfs get -H all` dump (D17 shortcut).
 - [ ] Extend the device multi-select to existing-pool actions (add vdev/cache/
       spare, attach, replace) — still free-text. Ref: todo.md.
 - [ ] Decide whether D15's disk filter should also hide disks holding non-ZFS
