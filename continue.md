@@ -13,8 +13,9 @@ decisions.md; deferred work lives in todo.md.
 
 ## Current state
 
-- All local gates green (`just check`, `just ui-check`); working tree contains
-  the create-pool device multi-select change (decisions.md D15), uncommitted.
+- All local gates green (`just check`, `just ui-check`); the create-pool device
+  multi-select (decisions.md D15) is committed and released as tag `v0.1.2`
+  (`just tag <version>` tags and pushes; packages derive version `0.1.2` from it).
 
 ## Next up
 

@@ -120,3 +120,8 @@ fixtures-capture:
 # Push master to the GitHub remote (external op kept as a recipe per repo rules)
 push:
     git push origin master
+
+# Tag a release (v-prefixed; Makefile strips the v for package versions) and push it
+tag version:
+    git tag v{{version}}
+    git push origin v{{version}}
